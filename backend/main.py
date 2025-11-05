@@ -1,20 +1,17 @@
-from datetime import datetime, timedelta
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from functools import wraps
 import jwt
-from Secret_info_dont_upload_this_in_deployment import CONFIG,JWT_KEY
-from flask import Flask,request,jsonify
-from flask_cors import CORS
-import cx_Oracle
-from werkzeug.security import generate_password_hash, check_password_hash
+import os
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from Secret_info_dont_upload_this_in_deployment import DATABASE_URL, JWT_KEY
 
 
-app=Flask(__name__)
+app = Flask(__name__)
 CORS(app)
 
 app.config['JWT_SECRET_KEY'] = JWT_KEY
-
-ORACLE_CONFIG=CONFIG
-
 
 
 # JWT Token verification decorator
@@ -41,13 +38,15 @@ def token_required(f):
 
     return decorated
 
-#connect DB
+
+# ✅ Connect PostgreSQL DB
 def get_db_connection():
     try:
-        connection=cx_Oracle.connect(**ORACLE_CONFIG)
+        connection = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        print("✅ Connected to PostgreSQL successfully")
         return connection
-    except cx_Oracle.Error as error:
-        print(f"DB connection error: {error}")
+    except Exception as error:
+        print(f"❌ DB connection error: {error}")
         return None
 
 
