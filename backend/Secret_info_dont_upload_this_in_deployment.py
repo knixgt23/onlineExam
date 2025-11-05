@@ -1,8 +1,11 @@
-CONFIG={
-    'user':'C##exam_admin',
-    'password':'exam_password_123',
-    'dsn':'localhost:1521/XE',
-    'encoding':'UTF-8'
+import os
+
+CONFIG = {
+    'user': os.getenv('ORACLE_USER'),
+    'password': os.getenv('ORACLE_PASSWORD'),
+    'dsn': os.getenv('ORACLE_DSN'),
+    'encoding': 'UTF-8'
 }
 
-JWT_KEY='your-jwt-secret-key-change-this-in-production'
+
+JWT_KEY = os.getenv('JWT_KEY', 'fallback-secret-if-not-set')
