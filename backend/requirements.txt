@@ -1,0 +1,5 @@
+flask
+flask-cors
+cx_Oracle
+PyJWT
+Werkzeug
