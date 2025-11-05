@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>EduAssess - Exam Proctoring Setup</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <!-- TensorFlow.js for AI-based proctoring -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "success": "#16a34a",
+                        "error": "#dc2626"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden">
+    <div class="layout-container flex h-full grow flex-col">
+        <div class="flex flex-1 justify-center py-5 sm:py-10 px-4">
+            <div class="layout-content-container flex flex-col w-full max-w-4xl flex-1">
+                <header class="flex items-center justify-between whitespace-nowrap border-b border-slate-200 dark:border-slate-800 px-4 sm:px-10 py-3">
+                    <div class="flex items-center gap-4 text-slate-900 dark:text-slate-50">
+                        <div class="size-6 text-primary">
+                            <svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z" fill="currentColor"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-slate-900 dark:text-slate-50 text-lg font-bold leading-tight tracking-[-0.015em]">EduAssess</h2>
+                    </div>
+                    <div class="flex flex-1 justify-end gap-4 sm:gap-8">
+                        <button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-50 gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+                            <span class="material-symbols-outlined text-inherit text-xl">help</span>
+                        </button>
+                        <div class="bg-primary flex items-center justify-center text-white font-bold rounded-full size-10" id="userAvatar">U</div>
+                    </div>
+                </header>
+                <main class="flex-1 mt-6 sm:mt-10">
+                    <div class="flex flex-wrap justify-between gap-4 p-4">
+                        <div class="flex w-full flex-col gap-2">
+                            <p class="text-slate-900 dark:text-slate-50 text-4xl font-black leading-tight tracking-[-0.033em]">Final Check Before Your Exam</p>
+                            <p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">Please complete the following system checks to begin your proctored exam.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 p-4 mt-6">
+                        <div class="lg:col-span-3 flex flex-col gap-6">
+                            <div class="flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-slate-50">System Checks</h3>
+                                <div class="flex flex-col gap-4">
+                                    <!-- Screen Sharing -->
+                                    <div class="flex items-center gap-4 bg-transparent min-h-[72px] py-2 justify-between">
+                                        <div class="flex items-center gap-4">
+                                            <div class="text-slate-600 dark:text-slate-300 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 size-12">
+                                                <span class="material-symbols-outlined text-2xl">desktop_windows</span>
+                                            </div>
+                                            <div class="flex flex-col justify-center">
+                                                <p class="text-slate-900 dark:text-slate-50 text-base font-medium leading-normal line-clamp-1">Screen Sharing</p>
+                                                <p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal line-clamp-2">We need to monitor your screen to ensure academic integrity.</p>
+                                            </div>
+                                        </div>
+                                        <div class="shrink-0">
+                                            <button id="screenBtn" onclick="requestScreenShare()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-50 text-sm font-medium leading-normal w-fit">
+                                                <span class="truncate">Enable</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- Camera Access -->
+                                    <div class="flex items-center gap-4 bg-transparent min-h-[72px] py-2 justify-between">
+                                        <div class="flex items-center gap-4">
+                                            <div class="text-slate-600 dark:text-slate-300 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 size-12">
+                                                <span class="material-symbols-outlined text-2xl">photo_camera</span>
+                                            </div>
+                                            <div class="flex flex-col justify-center">
+                                                <p class="text-slate-900 dark:text-slate-50 text-base font-medium leading-normal line-clamp-1">Camera Access</p>
+                                                <p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal line-clamp-2">Required for identity verification and continuous monitoring.</p>
+                                            </div>
+                                        </div>
+                                        <div class="shrink-0 flex items-center gap-2">
+                                            <button id="cameraBtn" onclick="requestCamera()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-50 text-sm font-medium leading-normal w-fit">
+                                                <span class="truncate">Enable</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- Microphone -->
+                                    <div class="flex items-center gap-4 bg-transparent min-h-[72px] py-2 justify-between">
+                                        <div class="flex items-center gap-4">
+                                            <div class="text-slate-600 dark:text-slate-300 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 size-12">
+                                                <span class="material-symbols-outlined text-2xl">mic</span>
+                                            </div>
+                                            <div class="flex flex-col justify-center">
+                                                <p class="text-slate-900 dark:text-slate-50 text-base font-medium leading-normal line-clamp-1">Microphone</p>
+                                                <p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal line-clamp-2">To monitor your exam environment for unauthorized assistance.</p>
+                                            </div>
+                                        </div>
+                                        <div class="shrink-0 flex items-center gap-2">
+                                            <button id="micBtn" onclick="requestMicrophone()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-50 text-sm font-medium leading-normal w-fit">
+                                                <span class="truncate">Enable</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- AI Proctoring -->
+                                    <div class="flex items-center gap-4 bg-transparent min-h-[72px] py-2 justify-between">
+                                        <div class="flex items-center gap-4">
+                                            <div class="text-slate-600 dark:text-slate-300 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 size-12">
+                                                <span class="material-symbols-outlined text-2xl">psychology</span>
+                                            </div>
+                                            <div class="flex flex-col justify-center">
+                                                <p class="text-slate-900 dark:text-slate-50 text-base font-medium leading-normal line-clamp-1">AI Proctoring</p>
+                                                <p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal line-clamp-2">Loading AI models for real-time monitoring.</p>
+                                            </div>
+                                        </div>
+                                        <div class="shrink-0 flex items-center gap-2">
+                                            <span id="aiStatus" class="text-sm font-medium text-slate-500">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-slate-50">Why do we need this?</h3>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">To ensure a fair and secure testing environment for all students, we require access to your screen, camera, and microphone. Our AI-powered proctoring system will monitor for suspicious behavior including multiple faces, prohibited objects (phones, books), and tab switching. Your data is handled securely and used solely for proctoring purposes.</p>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2 flex flex-col gap-6">
+                            <div class="p-0">
+                                <div class="relative flex items-center justify-center bg-slate-900 bg-cover bg-center aspect-video rounded-xl overflow-hidden">
+                                    <video id="cameraPreview" autoplay playsinline class="absolute inset-0 w-full h-full object-cover hidden"></video>
+                                    <div id="cameraPlaceholder" class="relative z-10 text-center p-4">
+                                        <span class="material-symbols-outlined text-white/50 text-5xl">videocam_off</span>
+                                        <p class="text-white/70 mt-2 text-sm">Camera preview will appear here</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-4">
+                                <button id="startExamBtn" onclick="startExam()" disabled class="w-full flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400 disabled:cursor-not-allowed">
+                                    <span class="truncate">Start Exam</span>
+                                </button>
+                                <a class="text-center text-sm text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary underline cursor-pointer" onclick="goBack()">Having trouble? Go Back</a>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:5000/api';
+    let currentUser = null;
+    let examId = null;
+    let cameraStream = null;
+    let screenStream = null;
+    let micStream = null;
+    let aiModelsLoaded = false;
+    let faceModel = null;
+    let objectModel = null;
+
+    let permissions = {
+        camera: false,
+        screen: false,
+        microphone: false,
+        ai: false
+    };
+
+    window.onload = async () => {
+        // Get exam ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        examId = urlParams.get('exam_id');
+
+        if (!examId) {
+            alert('No exam ID provided');
+            window.location.href = 'student-dashboard.html';
+            return;
+        }
+
+        // Get user data
+        const userData = localStorage.getItem('userData');
+        const token = localStorage.getItem('authToken');
+
+        if (!userData || !token) {
+            console.log('❌ No user data found, redirecting to login');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        currentUser = JSON.parse(userData);
+
+        // Update UI with user info
+        const initials = currentUser.full_name.split(' ').map(n => n[0]).join('').substring(0, 2);
+        document.getElementById('userAvatar').textContent = initials;
+
+        console.log('📋 Exam ID:', examId);
+        console.log('👤 Current user:', currentUser);
+
+        // Load AI models in background
+        loadAIModels();
+    };
+
+    async function loadAIModels() {
+        const statusEl = document.getElementById('aiStatus');
+        statusEl.textContent = 'Loading...';
+        statusEl.className = 'text-sm font-medium text-yellow-600';
+
+        try {
+            console.log('📦 Loading AI models...');
+
+            // Load face detection model
+            faceModel = await blazeface.load();
+            console.log('✅ Face detection model loaded');
+
+            // Load object detection model
+            objectModel = await cocoSsd.load();
+            console.log('✅ Object detection model loaded');
+
+            aiModelsLoaded = true;
+            permissions.ai = true;
+
+            statusEl.innerHTML = `
+                <span class="text-success text-sm font-medium flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">check_circle</span> Ready
+                </span>
+            `;
+
+            checkAllPermissions();
+
+        } catch (error) {
+            console.error('❌ Failed to load AI models:', error);
+            statusEl.innerHTML = `
+                <span class="text-error text-sm font-medium flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">error</span> Failed
+                </span>
+            `;
+        }
+    }
+
+    async function requestCamera() {
+        const btn = document.getElementById('cameraBtn');
+        const preview = document.getElementById('cameraPreview');
+        const placeholder = document.getElementById('cameraPlaceholder');
+
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="truncate">Requesting...</span>';
+
+            // Request camera access
+            cameraStream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
+                audio: false
+            });
+
+            // Show video preview
+            preview.srcObject = cameraStream;
+            preview.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+
+            // Update button to success state
+            btn.innerHTML = `
+                <span class="text-success text-sm font-medium flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">check_circle</span> Allowed
+                </span>
+            `;
+            btn.classList.remove('bg-slate-200', 'hover:bg-slate-300', 'dark:bg-slate-800');
+            btn.classList.add('bg-success/10', 'cursor-default');
+            btn.disabled = true;
+
+            permissions.camera = true;
+            checkAllPermissions();
+
+            console.log('✅ Camera access granted');
+
+        } catch (error) {
+            console.error('❌ Camera access denied:', error);
+
+            btn.innerHTML = `
+                <span class="text-error text-sm font-medium flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">cancel</span> Denied
+                </span>
+            `;
+            btn.classList.remove('bg-slate-200', 'hover:bg-slate-300', 'dark:bg-slate-800');
+            btn.classList.add('bg-error/10', 'cursor-default');
+
+            alert('Camera access is required to proceed with the exam. Please allow camera access and try again.');
+        }
+    }
+
+    async function requestScreenShare() {
+        const btn = document.getElementById('screenBtn');
+
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="truncate">Requesting...</span>';
+
+            // Request screen sharing
+            screenStream = await navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    cursor: "always",
+                    displaySurface: "monitor"
+                },
+                audio: false
+            });
+
+            // Update button to success state
+            btn.innerHTML = `
+                <span class="text-success text-sm font-medium flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">check_circle</span> Allowed
+                </span>
+            `;
+            btn.classList.remove('bg-slate-200', 'hover:bg-slate-300', 'dark:bg-slate-800');
+            btn.classList.add('bg-success/10', 'cursor-default');
+            btn.disabled = true;
+
+            permissions.screen = true;
+            checkAllPermissions();
+
+            console.log('✅ Screen sharing granted');
+
+            // Handle screen share stop
+            screenStream.getVideoTracks()[0].onended = () => {
+                console.log('⚠️ Screen sharing stopped');
+                alert('Screen sharing has been stopped. You must share your screen to continue the exam.');
+                permissions.screen = false;
+                checkAllPermissions();
+            };
+
+        } catch (error) {
+            console.error('❌ Screen sharing denied:', error);
+
+            btn.innerHTML = `
+                <span class="text-error text-sm font-medium flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">cancel</span> Denied
+                </span>
+            `;
+            btn.classList.remove('bg-slate-200', 'hover:bg-slate-300', 'dark:bg-slate-800');
+            btn.classList.add('bg-error/10', 'cursor-default');
+
+            alert('Screen sharing is required to proceed with the exam. Please allow screen sharing and try again.');
+        }
+    }
+
+    async function requestMicrophone() {
+        const btn = document.getElementById('micBtn');
+
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="truncate">Requesting...</span>';
+
+            // Request microphone access
+            micStream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: false
+            });
+
+            // Update button to success state
+            btn.innerHTML = `
+                <span class="text-success text-sm font-medium flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">check_circle</span> Allowed
+                </span>
+            `;
+            btn.classList.remove('bg-slate-200', 'hover:bg-slate-300', 'dark:bg-slate-800');
+            btn.classList.add('bg-success/10', 'cursor-default');
+            btn.disabled = true;
+
+            permissions.microphone = true;
+            checkAllPermissions();
+
+            console.log('✅ Microphone access granted');
+
+        } catch (error) {
+            console.error('❌ Microphone access denied:', error);
+
+            btn.innerHTML = `
+                <span class="text-error text-sm font-medium flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">cancel</span> Denied
+                </span>
+            `;
+            btn.classList.remove('bg-slate-200', 'hover:bg-slate-300', 'dark:bg-slate-800');
+            btn.classList.add('bg-error/10', 'cursor-default');
+
+            alert('Microphone access is required to proceed with the exam. Please allow microphone access and try again.');
+        }
+    }
+
+    function checkAllPermissions() {
+        const startBtn = document.getElementById('startExamBtn');
+
+        if (permissions.camera && permissions.screen && permissions.microphone && permissions.ai) {
+            startBtn.disabled = false;
+            startBtn.classList.remove('disabled:bg-slate-300', 'disabled:text-slate-500');
+            startBtn.classList.add('hover:bg-blue-600', 'cursor-pointer');
+            console.log('✅ All permissions granted - Exam can start');
+        } else {
+            console.log('⏳ Waiting for all permissions...', permissions);
+        }
+    }
+
+    async function startExam() {
+        console.log('🚀 Starting exam...');
+        console.log('📋 Exam ID:', examId);
+        console.log('👤 Student ID:', currentUser.role_id);
+
+        const startBtn = document.getElementById('startExamBtn');
+        startBtn.disabled = true;
+        startBtn.innerHTML = '<span class="truncate">Starting...</span>';
+
+        try {
+            const token = localStorage.getItem('authToken');
+
+            // Step 1: Try to enroll student first (in case not enrolled)
+            console.log('📝 Enrolling student...');
+            try {
+                const enrollResponse = await fetch(`${API_BASE}/student/exam/${examId}/enroll`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const enrollData = await enrollResponse.json();
+                console.log('📝 Enrollment response:', enrollData);
+
+                // Continue even if already enrolled
+                if (enrollData.status === 'success' || enrollData.message?.includes('already enrolled')) {
+                    console.log('✅ Student enrolled successfully');
+                }
+            } catch (enrollError) {
+                console.warn('⚠️ Enrollment check failed, continuing anyway:', enrollError);
+                // Continue to start exam even if enrollment fails
+            }
+
+            // Step 2: Start exam session
+            console.log('🎯 Starting exam session...');
+            const response = await fetch(`${API_BASE}/student/exam/${examId}/start`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    browser_info: navigator.userAgent,
+                    device_info: `${navigator.platform} - ${screen.width}x${screen.height}`
+                })
+            });
+
+            const data = await response.json();
+            console.log('📦 Start exam response:', data);
+
+            if (data.status === 'success') {
+                console.log('✅ Session created:', data.session_id);
+
+                // Store session ID and proctoring data
+                sessionStorage.setItem('examSessionId', data.session_id);
+                sessionStorage.setItem('examId', examId);
+                sessionStorage.setItem('proctoringEnabled', 'true');
+
+                // Redirect to exam page - FIXED FILENAME
+                console.log('🔄 Redirecting to exam.html...');
+                window.location.href = `exam-page.html?session_id=${data.session_id}`;
+            } else {
+                throw new Error(data.message || 'Failed to start exam');
+            }
+
+        } catch (error) {
+            console.error('❌ Error starting exam:', error);
+            alert('Failed to start exam: ' + error.message + '\n\nPlease contact your instructor if this problem persists.');
+            startBtn.disabled = false;
+            startBtn.innerHTML = '<span class="truncate">Start Exam</span>';
+        }
+    }
+
+    function goBack() {
+        // Stop all streams
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+        }
+        if (screenStream) {
+            screenStream.getTracks().forEach(track => track.stop());
+        }
+        if (micStream) {
+            micStream.getTracks().forEach(track => track.stop());
+        }
+
+        window.location.href = 'student-dashboard.html';
+    }
+
+    // Handle page unload
+    window.addEventListener('beforeunload', (e) => {
+        if (permissions.camera || permissions.screen || permissions.microphone) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+</script>
+</body>
+</html>

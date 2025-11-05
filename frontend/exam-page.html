@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduAssess - Exam in Progress</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .warning-flash { animation: flashWarning 0.5s ease-in-out 3; }
+        @keyframes flashWarning {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: rgba(239, 68, 68, 0.2); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-white border-b border-gray-200 px-6 py-4 fixed top-0 left-0 right-0 z-50">
+        <div class="flex items-center justify-between">
+            <h1 id="examTitle" class="text-xl font-bold text-gray-900">Loading...</h1>
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
+                    <span class="material-symbols-outlined text-blue-600">timer</span>
+                    <span id="timer" class="font-mono text-xl font-bold">00:00:00</span>
+                </div>
+                <button onclick="confirmSubmit()" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold">Submit Exam</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-20">
+        <main class="flex-1 p-6 mr-80">
+            <div class="max-w-4xl mx-auto">
+                <div id="warningBanner" class="hidden mb-4 p-4 bg-red-100 border-2 border-red-500 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-red-600 text-3xl">warning</span>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-red-900" id="warningTitle">Alert!</h3>
+                            <p class="text-red-800 text-sm" id="warningMessage"></p>
+                        </div>
+                        <button onclick="dismissWarning()" class="text-red-600"><span class="material-symbols-outlined">close</span></button>
+                    </div>
+                </div>
+
+                <div id="loadingState" class="flex justify-center items-center py-20">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                </div>
+
+                <div id="questionCard" class="hidden bg-white rounded-xl shadow-md p-8 mb-6">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900 mb-2" id="questionNumber">Question 1</h2>
+                            <div class="flex gap-2">
+                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium" id="questionType">MCQ</span>
+                                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium" id="questionMarks">5 marks</span>
+                            </div>
+                        </div>
+                        <button onclick="toggleMark()" id="markBtn" class="flex items-center gap-2 px-4 py-2 border-2 border-amber-500 text-amber-700 rounded-lg hover:bg-amber-50">
+                            <span class="material-symbols-outlined">flag</span> Mark for Review
+                        </button>
+                    </div>
+
+                    <p id="questionText" class="text-lg text-gray-900 mb-8 leading-relaxed"></p>
+                    <div id="mcqOptions" class="space-y-3 hidden"></div>
+                    <div id="subjectiveAnswer" class="hidden">
+                        <textarea id="subjectiveText" rows="10" class="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none" placeholder="Type your answer here..."></textarea>
+                    </div>
+
+                    <div class="flex justify-between mt-8 pt-6 border-t border-gray-200">
+                        <button onclick="previousQ()" id="prevBtn" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium disabled:opacity-50">← Previous</button>
+                        <button onclick="saveAndNext()" id="nextBtn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">Save & Next →</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="w-80 bg-white border-l border-gray-200 fixed right-0 top-20 bottom-0 overflow-y-auto p-6">
+            <div class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-3">Proctoring Monitor</h3>
+                <div class="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
+                    <video id="cameraPreview" autoplay playsinline muted class="w-full h-full object-cover"></video>
+                    <canvas id="detectionCanvas" class="absolute inset-0 w-full h-full"></canvas>
+                    <div class="absolute bottom-2 left-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Monitoring Active
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2 mb-6">
+                <div id="faceStatusCard" class="p-3 bg-green-50 rounded-lg">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-700">Face Detection</span>
+                        <span id="faceStatus" class="text-green-700 font-semibold">✓ Normal</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-blue-50 rounded-lg">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-700">Tab Switches</span>
+                        <span id="tabSwitchCount" class="text-blue-700 font-semibold">0</span>
+                    </div>
+                </div>
+                <div class="p-3 bg-amber-50 rounded-lg">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-700">Warnings</span>
+                        <span id="warningCount" class="text-amber-700 font-semibold">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-3">Recent Alerts</h3>
+                <div id="recentAlerts" class="space-y-2 max-h-40 overflow-y-auto">
+                    <p class="text-xs text-gray-500">No alerts yet</p>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-sm font-semibold text-gray-700 mb-3">Questions</h3>
+                <div id="questionPalette" class="grid grid-cols-5 gap-2 mb-4"></div>
+                <div class="space-y-2 text-xs">
+                    <div class="flex items-center gap-2"><div class="w-6 h-6 bg-green-500 rounded"></div><span>Answered</span></div>
+                    <div class="flex items-center gap-2"><div class="w-6 h-6 bg-amber-500 rounded"></div><span>Marked</span></div>
+                    <div class="flex items-center gap-2"><div class="w-6 h-6 bg-gray-200 rounded"></div><span>Not Answered</span></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div id="submitModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 m-4">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Submit Exam?</h3>
+            <div class="bg-gray-50 rounded-lg p-4 space-y-2 text-sm mb-6">
+                <div class="flex justify-between"><span>Total:</span><span id="modalTotal" class="font-semibold">0</span></div>
+                <div class="flex justify-between"><span>Answered:</span><span id="modalAnswered" class="font-semibold text-green-600">0</span></div>
+                <div class="flex justify-between"><span>Not Answered:</span><span id="modalNotAnswered" class="font-semibold text-red-600">0</span></div>
+                <div class="flex justify-between border-t pt-2"><span>Warnings:</span><span id="modalFlags" class="font-semibold text-amber-600">0</span></div>
+            </div>
+            <p class="text-red-600 font-medium mb-6">⚠️ You cannot change answers after submission!</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal()" class="flex-1 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium rounded-lg">Cancel</button>
+                <button onclick="submitExam()" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const API_BASE = 'http://localhost:5000/api';
+let sessionId, examId, questions = [], currentIndex = 0, answers = {}, marked = new Set();
+let timeLeft = 0, timerInterval = null, faceModel = null, objectModel = null;
+let proctoringStats = { tabSwitches: 0, noFaceDetections: 0, multipleFaces: 0, totalWarnings: 0 };
+let noFaceStreak = 0, recentAlerts = [];
+const NO_FACE_THRESHOLD = 5, MAX_RECENT_ALERTS = 5;
+
+window.onload = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    sessionId = urlParams.get('session_id');
+    if (!sessionId) { alert('No session ID'); window.location.href = 'student-dashboard.html'; return; }
+    await loadExam();
+    await initProctoring();
+    setupEventListeners();
+};
+
+function setupEventListeners() {
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            proctoringStats.tabSwitches++;
+            proctoringStats.totalWarnings++;
+            updateStats();
+            showWarning('⚠️ Tab Switch!', `Violation #${proctoringStats.tabSwitches}`);
+            logProctoringEvent('TAB_SWITCH', `Tab switch (Total: ${proctoringStats.tabSwitches})`, 'HIGH');
+            addRecentAlert('Tab Switch', 'HIGH');
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            proctoringStats.totalWarnings++;
+            updateStats();
+            showWarning('⚠️ Fullscreen Exited!', 'Return to fullscreen immediately.');
+            logProctoringEvent('FULLSCREEN_EXIT', 'Exited fullscreen', 'HIGH');
+            addRecentAlert('Fullscreen Exit', 'HIGH');
+        }
+    });
+
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && ['c','v','x','a','f','p','s'].includes(e.key)) {
+            e.preventDefault();
+            logProctoringEvent('KEYBOARD_SHORTCUT', `Blocked ${e.key}`, 'LOW');
+        }
+    });
+}
+
+function showWarning(title, message) {
+    document.getElementById('warningTitle').textContent = title;
+    document.getElementById('warningMessage').textContent = message;
+    const banner = document.getElementById('warningBanner');
+    banner.classList.remove('hidden');
+    banner.classList.add('warning-flash');
+    setTimeout(() => banner.classList.add('hidden'), 10000);
+}
+
+function dismissWarning() { document.getElementById('warningBanner').classList.add('hidden'); }
+
+function updateStats() {
+    document.getElementById('tabSwitchCount').textContent = proctoringStats.tabSwitches;
+    document.getElementById('warningCount').textContent = proctoringStats.totalWarnings;
+}
+
+function addRecentAlert(message, severity) {
+    const colors = { 'LOW': 'bg-yellow-50 text-yellow-800', 'MEDIUM': 'bg-orange-50 text-orange-800', 'HIGH': 'bg-red-50 text-red-800' };
+    recentAlerts.unshift({ message, time: new Date().toLocaleTimeString(), severity });
+    if (recentAlerts.length > MAX_RECENT_ALERTS) recentAlerts.pop();
+    document.getElementById('recentAlerts').innerHTML = recentAlerts.map(a =>
+        `<div class="text-xs p-2 rounded ${colors[a.severity]}"><div class="font-semibold">${a.message}</div><div class="opacity-75">${a.time}</div></div>`
+    ).join('');
+}
+
+async function loadExam() {
+    try {
+        const token = localStorage.getItem('authToken');
+        const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+        const sessionRes = await fetch(`${API_BASE}/student/session/${sessionId}`, { headers });
+        const sessionData = await sessionRes.json();
+        if (sessionData.status !== 'success') throw new Error('Failed to load session');
+
+        examId = sessionData.session.exam_id;
+
+        const examRes = await fetch(`${API_BASE}/student/exam/${examId}/details`, { headers });
+        const examData = await examRes.json();
+        if (examData.status === 'success') {
+            document.getElementById('examTitle').textContent = examData.exam.exam_title;
+            timeLeft = examData.exam.duration_minutes * 60;
+            startTimer();
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
+
+        const questionsRes = await fetch(`${API_BASE}/student/exam/${examId}/questions`, { headers });
+        const questionsData = await questionsRes.json();
+        if (questionsData.status === 'success') {
+            questions = questionsData.questions;
+            console.log(`✅ Loaded ${questions.length} questions`);
+            createPalette();
+            showQuestion(0);
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('questionCard').classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('❌ Error:', error);
+        alert('Failed to load exam: ' + error.message);
+    }
+}
+
+function createPalette() {
+    const palette = document.getElementById('questionPalette');
+    palette.innerHTML = questions.map((q, i) =>
+        `<button onclick="showQuestion(${i})" id="btn-${i}" class="w-10 h-10 rounded font-semibold bg-gray-200 hover:bg-gray-300">${i+1}</button>`
+    ).join('');
+}
+
+function updatePaletteBtn(index) {
+    const btn = document.getElementById(`btn-${index}`);
+    if (!btn) return;
+    btn.className = marked.has(index) ? 'w-10 h-10 rounded font-semibold bg-amber-500 text-white' :
+                     answers[index] ? 'w-10 h-10 rounded font-semibold bg-green-500 text-white' :
+                     'w-10 h-10 rounded font-semibold bg-gray-200 hover:bg-gray-300';
+}
+
+function showQuestion(index) {
+    if (index < 0 || index >= questions.length) return;
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById('questionNumber').textContent = `Question ${index + 1} of ${questions.length}`;
+    document.getElementById('questionType').textContent = q.question_type;
+    document.getElementById('questionMarks').textContent = `${q.marks} marks`;
+    document.getElementById('questionText').textContent = q.question_text;
+
+    const markBtn = document.getElementById('markBtn');
+    marked.has(index) ? markBtn.classList.add('bg-amber-50') : markBtn.classList.remove('bg-amber-50');
+
+    if (q.question_type === 'MCQ' || q.question_type === 'TRUE_FALSE') {
+        document.getElementById('mcqOptions').classList.remove('hidden');
+        document.getElementById('subjectiveAnswer').classList.add('hidden');
+        loadMCQ(q, index);
+    } else {
+        document.getElementById('mcqOptions').classList.add('hidden');
+        document.getElementById('subjectiveAnswer').classList.remove('hidden');
+        document.getElementById('subjectiveText').value = answers[index]?.answer_text || '';
+    }
+
+    document.getElementById('prevBtn').disabled = index === 0;
+    document.getElementById('nextBtn').textContent = index === questions.length - 1 ? 'Save' : 'Save & Next →';
+}
+
+function loadMCQ(question, qIndex) {
+    const container = document.getElementById('mcqOptions');
+    if (!question.options || question.options.length === 0) {
+        container.innerHTML = '<p class="text-red-600">⚠️ No options available</p>';
+        return;
+    }
+
+    container.innerHTML = question.options.map(opt => {
+        const isSelected = answers[qIndex]?.selected_option_id === opt.option_id;
+        return `
+            <div onclick="selectOption(${qIndex}, ${opt.option_id})"
+                 class="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'}">
+                <input type="radio" name="q${qIndex}" ${isSelected ? 'checked' : ''} class="w-5 h-5 text-blue-600">
+                <span class="font-bold text-gray-700">${opt.option_order}.</span>
+                <span class="flex-1 text-gray-900">${opt.option_text}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function selectOption(qIndex, optionId) {
+    answers[qIndex] = { question_id: questions[qIndex].question_id, selected_option_id: optionId, answer_text: null };
+    loadMCQ(questions[qIndex], qIndex);
+    updatePaletteBtn(qIndex);
+    saveAnswer(qIndex);
+}
+
+function toggleMark() {
+    marked.has(currentIndex) ? marked.delete(currentIndex) : marked.add(currentIndex);
+    updatePaletteBtn(currentIndex);
+    showQuestion(currentIndex);
+}
+
+async function saveAnswer(qIndex) {
+    const answer = answers[qIndex];
+    if (!answer) {
+        const text = document.getElementById('subjectiveText')?.value;
+        if (text?.trim()) answers[qIndex] = { question_id: questions[qIndex].question_id, answer_text: text, selected_option_id: null };
+        else return;
+    }
+
+    try {
+        const token = localStorage.getItem('authToken');
+        await fetch(`${API_BASE}/student/answer/save`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: sessionId,
+                question_id: answers[qIndex].question_id,
+                answer_text: answers[qIndex].answer_text,
+                selected_option_id: answers[qIndex].selected_option_id,
+                is_marked_for_review: marked.has(qIndex) ? 1 : 0
+            })
+        });
+    } catch (error) { console.error('Save failed:', error); }
+}
+
+function saveAndNext() {
+    saveAnswer(currentIndex);
+    if (currentIndex < questions.length - 1) showQuestion(currentIndex + 1);
+}
+
+function previousQ() { saveAnswer(currentIndex); showQuestion(currentIndex - 1); }
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        const h = Math.floor(timeLeft / 3600), m = Math.floor((timeLeft % 3600) / 60), s = timeLeft % 60;
+        document.getElementById('timer').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        if (timeLeft <= 300) document.getElementById('timer').classList.add('text-red-600');
+        if (timeLeft <= 0) { clearInterval(timerInterval); autoSubmit(); }
+    }, 1000);
+}
+
+async function initProctoring() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+        document.getElementById('cameraPreview').srcObject = stream;
+        faceModel = await blazeface.load();
+        objectModel = await cocoSsd.load();
+        console.log('✅ Proctoring initialized');
+        setInterval(checkProctoring, 3000);
+    } catch (error) {
+        console.error('❌ Proctoring failed:', error);
+        logProctoringEvent('PROCTORING_ERROR', 'Failed: ' + error.message, 'HIGH');
+    }
+}
+
+async function checkProctoring() {
+    const video = document.getElementById('cameraPreview');
+    if (!video || !faceModel || !video.videoWidth) return;
+
+    try {
+        const faces = await faceModel.estimateFaces(video, false);
+        const statusCard = document.getElementById('faceStatusCard');
+        const faceStatus = document.getElementById('faceStatus');
+
+        if (faces.length === 0) {
+            noFaceStreak++;
+            statusCard.className = 'p-3 bg-red-50 rounded-lg';
+            faceStatus.textContent = `⚠️ No Face (${noFaceStreak})`;
+            faceStatus.className = 'text-red-700 font-semibold';
+
+            if (noFaceStreak === NO_FACE_THRESHOLD) {
+                proctoringStats.noFaceDetections++;
+                proctoringStats.totalWarnings++;
+                updateStats();
+                showWarning('⚠️ No Face Detected!', 'Your face has been out of frame for 15 seconds.');
+                logProctoringEvent('NO_FACE', `No face for ${noFaceStreak} checks`, 'MEDIUM');
+                addRecentAlert('No Face', 'MEDIUM');
+            }
+        } else if (faces.length > 1) {
+            noFaceStreak = 0;
+            proctoringStats.multipleFaces++;
+            proctoringStats.totalWarnings++;
+            updateStats();
+            statusCard.className = 'p-3 bg-red-50 rounded-lg';
+            faceStatus.textContent = `⚠️ Multiple Faces (${faces.length})`;
+            faceStatus.className = 'text-red-700 font-semibold';
+            showWarning('⚠️ Multiple Faces!', `${faces.length} faces detected. Only you should be visible.`);
+            logProctoringEvent('MULTIPLE_FACES', `${faces.length} faces detected`, 'HIGH');
+            addRecentAlert('Multiple Faces', 'HIGH');
+        } else {
+            noFaceStreak = 0;
+            statusCard.className = 'p-3 bg-green-50 rounded-lg';
+            faceStatus.textContent = '✓ Normal';
+            faceStatus.className = 'text-green-700 font-semibold';
+        }
+
+        if (objectModel) {
+            const objects = await objectModel.detect(video);
+            objects.forEach(obj => {
+                if (obj.class === 'cell phone') {
+                    proctoringStats.totalWarnings++;
+                    updateStats();
+                    showWarning('⚠️ Phone Detected!', 'Mobile phone detected in frame.');
+                    logProctoringEvent('PHONE', 'Phone detected', 'HIGH');
+                    addRecentAlert('Phone Detected', 'HIGH');
+                }
+            });
+        }
+    } catch (error) { console.error('Proctoring check error:', error); }
+}
+
+async function logProctoringEvent(type, desc, severity) {
+    try {
+        const token = localStorage.getItem('authToken');
+        await fetch(`${API_BASE}/student/proctoring/log`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sessionId, event_type: type, event_description: desc, severity: severity })
+        });
+    } catch (error) { console.error('Log failed:', error); }
+}
+
+function confirmSubmit() {
+    const answered = Object.keys(answers).length;
+    document.getElementById('modalTotal').textContent = questions.length;
+    document.getElementById('modalAnswered').textContent = answered;
+    document.getElementById('modalNotAnswered').textContent = questions.length - answered;
+    document.getElementById('modalFlags').textContent = proctoringStats.totalWarnings;
+    document.getElementById('submitModal').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('submitModal').classList.add('hidden'); }
+
+async function submitExam() {
+    try {
+        await saveAnswer(currentIndex);
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${API_BASE}/student/exam/submit`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sessionId, force_submit: 0 })
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+            clearInterval(timerInterval);
+            alert('✅ Exam submitted successfully!');
+            window.location.href = 'student-dashboard.html';
+        } else alert('Failed: ' + result.message);
+    } catch (error) {
+        console.error('Submit error:', error);
+        alert('Failed to submit. Please try again.');
+    }
+}
+
+async function autoSubmit() {
+    alert('⏰ Time is up! Auto-submitting...');
+    const token = localStorage.getItem('authToken');
+    await fetch(`${API_BASE}/student/exam/submit`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, force_submit: 1 })
+    });
+    window.location.href = 'student-dashboard.html';
+}
+
+window.addEventListener('beforeunload', e => {
+    if (timeLeft > 0) { e.preventDefault(); e.returnValue = ''; }
+});
+    </script>
+</body>
+</html>

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>EduAssess Student Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3A7CA5",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "accent": "#4CAF50"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .hidden { display: none !important; }
+        .tab-active {
+            color: #3A7CA5;
+            border-bottom: 2px solid #3A7CA5;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#333333] dark:text-gray-200">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+    <div class="flex flex-1">
+        <!-- SideNavBar -->
+        <aside class="flex h-screen min-h-[700px] flex-col justify-between bg-white dark:bg-gray-900 p-4 w-64 border-r border-gray-200 dark:border-gray-800">
+            <div class="flex flex-col gap-8">
+                <div class="flex items-center gap-3 px-3 py-2">
+                    <div class="size-8 text-primary">
+                        <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z" fill="currentColor"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-bold text-primary dark:text-white">EduAssess</h1>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="flex flex-col gap-3 px-2">
+                    <div class="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">Available</p>
+                                <p class="text-2xl font-bold text-primary" id="availableCount">0</p>
+                            </div>
+                            <span class="material-symbols-outlined text-primary text-3xl">assignment</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-lg p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">Completed</p>
+                                <p class="text-2xl font-bold text-green-600" id="completedCount">0</p>
+                            </div>
+                            <span class="material-symbols-outlined text-green-600 text-3xl">check_circle</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-lg p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">Avg Score</p>
+                                <p class="text-2xl font-bold text-blue-600" id="avgScore">0%</p>
+                            </div>
+                            <span class="material-symbols-outlined text-blue-600 text-3xl">trending_up</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Exams Timeline -->
+                <div class="flex flex-col gap-2">
+                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 px-3 mb-2">Upcoming Exams</h2>
+                    <div id="upcomingTimeline" class="relative pl-6">
+                        <div class="absolute left-3 top-2 bottom-2 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
+                        <p class="text-sm text-gray-400 px-2">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto">
+            <!-- TopNavBar -->
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f0f2f4] dark:border-b-gray-800 px-10 py-4 bg-white dark:bg-gray-900">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-lg font-semibold text-gray-700 dark:text-gray-300" id="currentSection">Dashboard</h2>
+                </div>
+                <div class="flex flex-1 justify-end items-center gap-4">
+                    <button class="flex items-center justify-center rounded-full h-10 w-10 bg-[#f0f2f4] dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-xl">notifications</span>
+                    </button>
+                    <button class="flex items-center justify-center rounded-full h-10 w-10 bg-[#f0f2f4] dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-xl">help_outline</span>
+                    </button>
+                    <button onclick="logout()" class="flex items-center justify-center rounded-full h-10 w-10 bg-[#f0f2f4] dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <span class="material-symbols-outlined text-xl">logout</span>
+                    </button>
+                    <div class="bg-primary flex items-center justify-center text-white font-bold rounded-full size-10" id="userAvatar">
+                        U
+                    </div>
+                </div>
+            </header>
+
+            <div class="px-10 py-8">
+                <!-- PageHeading -->
+                <div class="flex flex-wrap justify-between gap-3 mb-8">
+                    <div class="flex min-w-72 flex-col gap-2">
+                        <p class="text-4xl font-black leading-tight tracking-[-0.033em] text-[#111418] dark:text-white" id="welcomeText">Welcome!</p>
+                        <p class="text-base font-normal leading-normal text-gray-500 dark:text-gray-400">Here are your available exams. Good luck!</p>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex gap-4 border-b border-gray-200 dark:border-gray-700 mb-6">
+                    <button onclick="switchTab('available')" id="tab-available" class="px-4 py-2 font-medium tab-active transition-colors">
+                        Available Exams
+                    </button>
+                    <button onclick="switchTab('upcoming')" id="tab-upcoming" class="px-4 py-2 font-medium text-gray-500 dark:text-gray-400 hover:text-primary transition-colors">
+                        Upcoming Exams
+                    </button>
+                    <button onclick="switchTab('results')" id="tab-results" class="px-4 py-2 font-medium text-gray-500 dark:text-gray-400 hover:text-primary transition-colors">
+                        My Results
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="flex justify-center items-center py-20">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+
+                <!-- Available Exams Tab -->
+                <div id="availableExamsContainer" class="hidden">
+                    <div id="availableExamsList" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Cards will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Upcoming Exams Tab -->
+                <div id="upcomingExamsContainer" class="hidden">
+                    <div id="upcomingExamsList" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Cards will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Results Tab -->
+                <div id="resultsContainer" class="hidden">
+                    <div id="resultsList" class="space-y-4">
+                        <!-- Results will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:5000/api';
+    let currentUser = null;
+    let studentId = null;
+    let allExams = [];
+    let allResults = [];
+    let currentTab = 'available';
+
+    // Initialize on page load
+    window.onload = async () => {
+        const userData = localStorage.getItem('userData');
+        const token = localStorage.getItem('authToken');
+
+        if (!userData || !token) {
+            console.log('❌ No user data found, redirecting to login');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        currentUser = JSON.parse(userData);
+        studentId = currentUser.role_id;
+
+        console.log('👤 Current user:', currentUser);
+        console.log('🎓 Student ID:', studentId);
+
+        // Update UI with user info
+        document.getElementById('welcomeText').textContent = `Welcome, ${currentUser.full_name}!`;
+        const initials = currentUser.full_name.split(' ').map(n => n[0]).join('').substring(0, 2);
+        document.getElementById('userAvatar').textContent = initials;
+
+        // Load dashboard data
+        await loadDashboardData();
+    };
+
+    async function loadDashboardData() {
+        try {
+            const token = localStorage.getItem('authToken');
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+
+            console.log('📡 Fetching dashboard data...');
+
+            // Fetch all data in parallel
+            const [examsRes, resultsRes, statsRes] = await Promise.all([
+                fetch(`${API_BASE}/student/exams/${studentId}`, { headers }),
+                fetch(`${API_BASE}/student/results/${studentId}`, { headers }),
+                fetch(`${API_BASE}/student/stats/${studentId}`, { headers })
+            ]);
+
+            const examsData = await examsRes.json();
+            const resultsData = await resultsRes.json();
+            const statsData = await statsRes.json();
+
+            console.log('📦 Exams:', examsData);
+            console.log('📦 Results:', resultsData);
+            console.log('📦 Stats:', statsData);
+
+            if (examsData.status === 'success') {
+                allExams = examsData.exams;
+            }
+
+            if (resultsData.status === 'success') {
+                allResults = resultsData.results;
+            }
+
+            if (statsData.status === 'success') {
+                updateStats(statsData.stats);
+            }
+
+            // Render current tab
+            renderCurrentTab();
+            updateUpcomingTimeline();
+
+        } catch (error) {
+            console.error('❌ Error loading dashboard:', error);
+            showError('Failed to load dashboard data. Please check if backend is running.');
+        } finally {
+            document.getElementById('loadingState').classList.add('hidden');
+        }
+    }
+
+    function updateStats(stats) {
+        document.getElementById('availableCount').textContent = stats.available_exams || 0;
+        document.getElementById('completedCount').textContent = stats.total_exams_taken || 0;
+        document.getElementById('avgScore').textContent = (stats.average_percentage || 0).toFixed(1) + '%';
+    }
+
+    function updateUpcomingTimeline() {
+        const timeline = document.getElementById('upcomingTimeline');
+        const upcomingExams = allExams
+            .filter(e => e.exam_status === 'UPCOMING')
+            .sort((a, b) => new Date(a.scheduled_date) - new Date(b.scheduled_date))
+            .slice(0, 3);
+
+        if (upcomingExams.length === 0) {
+            timeline.innerHTML = '<p class="text-sm text-gray-400 px-2">No upcoming exams</p>';
+            return;
+        }
+
+        timeline.innerHTML = `
+            <div class="absolute left-3 top-2 bottom-2 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
+            ${upcomingExams.map((exam, i) => `
+                <div class="mb-6 relative">
+                    <div class="absolute -left-4.5 top-1.5 h-3 w-3 rounded-full ${i === 0 ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}"></div>
+                    <p class="font-medium text-sm text-gray-800 dark:text-gray-200">${formatDate(exam.scheduled_date)}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">${exam.exam_title}</p>
+                </div>
+            `).join('')}
+        `;
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+
+        // Update tab buttons
+        ['available', 'upcoming', 'results'].forEach(t => {
+            const btn = document.getElementById(`tab-${t}`);
+            if (t === tab) {
+                btn.classList.add('tab-active');
+                btn.classList.remove('text-gray-500', 'dark:text-gray-400');
+            } else {
+                btn.classList.remove('tab-active');
+                btn.classList.add('text-gray-500', 'dark:text-gray-400');
+            }
+        });
+
+        // Hide all containers
+        document.getElementById('availableExamsContainer').classList.add('hidden');
+        document.getElementById('upcomingExamsContainer').classList.add('hidden');
+        document.getElementById('resultsContainer').classList.add('hidden');
+
+        // Show selected container
+        renderCurrentTab();
+    }
+
+    function renderCurrentTab() {
+        if (currentTab === 'available') {
+            renderAvailableExams();
+        } else if (currentTab === 'upcoming') {
+            renderUpcomingExams();
+        } else if (currentTab === 'results') {
+            renderResults();
+        }
+    }
+
+    function renderAvailableExams() {
+        const container = document.getElementById('availableExamsContainer');
+        const list = document.getElementById('availableExamsList');
+
+        const activeExams = allExams.filter(e => e.exam_status === 'ACTIVE' && !e.has_attempted);
+
+        if (activeExams.length === 0) {
+            list.innerHTML = `
+                <div class="col-span-full text-center py-20 bg-white dark:bg-gray-900 rounded-xl shadow-md">
+                    <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-600">inbox</span>
+                    <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300 mt-4">No Active Exams</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mt-2">Check back later for your next scheduled exam.</p>
+                </div>
+            `;
+        } else {
+            list.innerHTML = activeExams.map(exam => createExamCard(exam)).join('');
+        }
+
+        container.classList.remove('hidden');
+    }
+
+    function renderUpcomingExams() {
+        const container = document.getElementById('upcomingExamsContainer');
+        const list = document.getElementById('upcomingExamsList');
+
+        const upcomingExams = allExams.filter(e => e.exam_status === 'UPCOMING');
+
+        if (upcomingExams.length === 0) {
+            list.innerHTML = `
+                <div class="col-span-full text-center py-20 bg-white dark:bg-gray-900 rounded-xl shadow-md">
+                    <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-600">event</span>
+                    <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300 mt-4">No Upcoming Exams</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mt-2">You're all caught up!</p>
+                </div>
+            `;
+        } else {
+            list.innerHTML = upcomingExams.map(exam => createExamCard(exam, true)).join('');
+        }
+
+        container.classList.remove('hidden');
+    }
+
+    function renderResults() {
+        const container = document.getElementById('resultsContainer');
+        const list = document.getElementById('resultsList');
+
+        if (allResults.length === 0) {
+            list.innerHTML = `
+                <div class="text-center py-20 bg-white dark:bg-gray-900 rounded-xl shadow-md">
+                    <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-gray-600">assignment_turned_in</span>
+                    <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300 mt-4">No Results Yet</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mt-2">Complete an exam to see your results here.</p>
+                </div>
+            `;
+        } else {
+            list.innerHTML = allResults.map(result => createResultCard(result)).join('');
+        }
+
+        container.classList.remove('hidden');
+    }
+
+    function createExamCard(exam, isUpcoming = false) {
+        const statusBadge = exam.exam_status === 'ACTIVE'
+            ? '<span class="inline-block px-3 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">Active Now</span>'
+            : '<span class="inline-block px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">Upcoming</span>';
+
+        const buttonHTML = isUpcoming
+            ? `<button disabled class="flex min-w-[120px] max-w-[480px] cursor-not-allowed items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-gray-300 text-gray-600 text-sm font-medium leading-normal">
+                   <span class="truncate">Starts ${formatDate(exam.scheduled_date)}</span>
+               </button>`
+            : `<button onclick="startExam(${exam.exam_id})" class="flex min-w-[120px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-5 bg-accent text-white text-sm font-medium leading-normal hover:bg-green-600 transition-colors">
+                   <span class="truncate">Start Exam</span>
+               </button>`;
+
+        return `
+            <div class="flex flex-col items-stretch justify-start rounded-xl shadow-md hover:shadow-lg transition-shadow bg-white dark:bg-gray-900">
+                <div class="w-full h-40 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-xl flex items-center justify-center">
+                    <span class="material-symbols-outlined text-6xl text-primary">quiz</span>
+                </div>
+                <div class="flex w-full flex-col items-stretch justify-center gap-3 p-5">
+                    <p class="text-xl font-bold leading-tight tracking-[-0.015em] text-[#111418] dark:text-white">${exam.exam_title}</p>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block px-3 py-1 text-xs font-semibold text-primary bg-primary/20 dark:bg-primary/30 dark:text-white rounded-full">${exam.subject}</span>
+                        ${statusBadge}
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">${exam.exam_description || 'No description available'}</p>
+                    <div class="flex flex-col gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">timer</span>
+                            <span>Duration: ${exam.duration_minutes} minutes</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">calendar_today</span>
+                            <span>${formatDateTime(exam.scheduled_date)}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">person</span>
+                            <span>${exam.teacher_name}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-base">score</span>
+                            <span>Total Marks: ${exam.total_marks}</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-2">
+                        ${buttonHTML}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function createResultCard(result) {
+        const gradeColor = getGradeColor(result.grade);
+        const statusColor = result.status === 'PASS' ? 'text-green-600' : 'text-red-600';
+        const statusIcon = result.status === 'PASS' ? 'check_circle' : 'cancel';
+
+        return `
+            <div class="bg-white dark:bg-gray-900 rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">${result.exam_title}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">${result.subject}</p>
+                    </div>
+                    <div class="flex items-center gap-2 ${statusColor}">
+                        <span class="material-symbols-outlined">${statusIcon}</span>
+                        <span class="font-semibold">${result.status}</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p class="text-2xl font-bold ${gradeColor}">${result.grade}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Grade</p>
+                    </div>
+                    <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">${result.percentage.toFixed(1)}%</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Percentage</p>
+                    </div>
+                    <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">${result.marks_obtained}/${result.total_marks}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Marks</p>
+                    </div>
+                    <div class="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white">${result.rank || 'N/A'}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Rank</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
+                    <div class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">schedule</span>
+                        <span>Duration: ${result.duration_taken || 'N/A'} min</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-base">calendar_today</span>
+                        <span>${formatDate(result.evaluated_at)}</span>
+                    </div>
+                    ${result.proctoring_incidents > 0 ? `
+                        <div class="flex items-center gap-1 text-orange-600">
+                            <span class="material-symbols-outlined text-base">warning</span>
+                            <span>${result.proctoring_incidents} incidents</span>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    function getGradeColor(grade) {
+        const colors = {
+            'A+': 'text-green-600',
+            'A': 'text-green-500',
+            'B': 'text-blue-600',
+            'C': 'text-yellow-600',
+            'D': 'text-orange-600',
+            'F': 'text-red-600'
+        };
+        return colors[grade] || 'text-gray-600';
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function formatDateTime(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function startExam(examId) {
+        console.log('🚀 Starting exam:', examId);
+        window.location.href = `exam-setup.html?exam_id=${examId}`;
+    }
+
+    function logout() {
+        console.log('👋 Logging out...');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        window.location.href = 'login.html';
+    }
+
+    function showError(message) {
+        // You can implement a toast notification here
+        alert(message);
+    }
+</script>
+</body>
+</html>

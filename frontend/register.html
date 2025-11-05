@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Create EduAssess Account</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#4A90E2",
+          "background-light": "#F4F7F9",
+          "background-dark": "#101922",
+          "text-light": "#333333",
+          "text-dark": "#E0E0E0",
+          "card-light": "#FFFFFF",
+          "card-dark": "#1A242E",
+          "border-light": "#CFDBE7",
+          "border-dark": "#344150",
+          "placeholder-light": "#6B7280",
+          "placeholder-dark": "#9CA3AF",
+          "success": "#2ECC71",
+          "error": "#E74C3C"
+        },
+        fontFamily: {
+          "display": ["Inter", "sans-serif"]
+        },
+        borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  .hidden {
+    display: none !important;
+  }
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center p-4">
+  <div class="absolute top-8 left-8 flex items-center gap-2">
+    <span class="material-symbols-outlined text-primary text-3xl">school</span>
+    <span class="text-2xl font-bold text-text-light dark:text-text-dark">EduAssess</span>
+  </div>
+
+  <div class="w-full max-w-md">
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-black tracking-tighter text-text-light dark:text-text-dark">Create your Account</h1>
+      <p class="mt-2 text-base text-gray-500 dark:text-gray-400">Join our platform to get started.</p>
+    </div>
+
+    <div class="w-full rounded-xl bg-card-light dark:bg-card-dark p-8 shadow-sm">
+      <form id="registerForm" class="flex flex-col gap-6">
+
+        <!-- User Type Selection -->
+        <label class="flex flex-col">
+          <p class="pb-2 text-base font-medium">I am a</p>
+          <select id="userType" class="form-input h-14 w-full rounded-DEFAULT border border-border-light bg-transparent p-4 text-base focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:text-text-dark">
+            <option value="STUDENT">Student</option>
+            <option value="TEACHER">Teacher</option>
+          </select>
+        </label>
+
+        <!-- Full Name -->
+        <label class="flex flex-col">
+          <p class="pb-2 text-base font-medium">Full Name</p>
+          <div class="relative flex w-full items-center">
+            <input id="fullName" class="form-input h-14 w-full flex-1 rounded-DEFAULT border border-border-light bg-transparent p-4 text-base placeholder:text-placeholder-light focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:text-text-dark dark:placeholder:text-placeholder-dark" placeholder="Enter your full name" type="text" required/>
+            <span class="material-symbols-outlined absolute right-4 text-gray-400">person</span>
+          </div>
+        </label>
+
+        <!-- Email -->
+        <label class="flex flex-col">
+          <p class="pb-2 text-base font-medium">Email</p>
+          <div class="relative flex w-full items-center">
+            <input id="email" class="form-input h-14 w-full flex-1 rounded-DEFAULT border border-border-light bg-transparent p-4 text-base placeholder:text-placeholder-light focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:text-text-dark dark:placeholder:text-placeholder-dark" placeholder="Enter your email address" type="email" required/>
+            <span class="material-symbols-outlined absolute right-4 text-gray-400">mail</span>
+          </div>
+        </label>
+
+        <!-- Phone Number -->
+        <label class="flex flex-col">
+          <p class="pb-2 text-base font-medium">Phone Number</p>
+          <div class="relative flex w-full items-center">
+            <input id="phoneNumber" class="form-input h-14 w-full flex-1 rounded-DEFAULT border border-border-light bg-transparent p-4 text-base placeholder:text-placeholder-light focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:text-text-dark dark:placeholder:text-placeholder-dark" placeholder="Enter phone number" type="tel"/>
+            <span class="material-symbols-outlined absolute right-4 text-gray-400">phone</span>
+          </div>
+        </label>
+
+        <!-- Roll Number (for Students) -->
+        <label id="rollNumberGroup" class="flex flex-col">
+          <p class="pb-2 text-base font-medium">Roll Number</p>
+          <div class="relative flex w-full items-center">
+            <input id="rollNumber" class="form-input h-14 w-full flex-1 rounded-DEFAULT border border-border-light bg-transparent p-4 text-base placeholder:text-placeholder-light focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:text-text-dark dark:placeholder:text-placeholder-dark" placeholder="e.g., CS2024001" type="text"/>
+            <span class="material-symbols-outlined absolute right-4 text-gray-400">badge</span>
+          </div>
+        </label>
+
+        <!-- Employee ID (for Teachers) -->
+        <label id="employeeIdGroup" class="flex flex-col hidden">
+          <p class="pb-2 text-base font-medium">Employee ID</p>
+          <div class="relative flex w-full items-center">
+            <input id="employeeId" class="form-input h-14 w-full flex-1 rounded-DEFAULT border border-border-light bg-transparent p-4 text-base placeholder:text-placeholder-light focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:text-text-dark dark:placeholder:text-placeholder-dark" placeholder="e.g., EMP2024001" type="text"/>
+            <span class="material-symbols-outlined absolute right-4 text-gray-400">work</span>
+          </div>
+        </label>
+
+        <!-- Department -->
+        <label class="flex flex-col">
+          <p class="pb-2 text-base font-medium">Department</p>
+          <div class="relative flex w-full items-center">
+            <input id="department" class="form-input h-14 w-full flex-1 rounded-DEFAULT border border-border-light bg-transparent p-4 text-base placeholder:text-placeholder-light focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:text-text-dark dark:placeholder:text-placeholder-dark" placeholder="e.g., Computer Science" type="text"/>
+            <span class="material-symbols-outlined absolute right-4 text-gray-400">apartment</span>
+          </div>
+        </label>
+
+        <!-- Password -->
+        <label class="flex flex-col">
+          <p class="pb-2 text-base font-medium">Password</p>
+          <div class="relative flex w-full items-center">
+            <input id="password" class="form-input h-14 w-full flex-1 rounded-DEFAULT border border-border-light bg-transparent p-4 text-base placeholder:text-placeholder-light focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:text-text-dark dark:placeholder:text-placeholder-dark" placeholder="Enter your password" type="password" required/>
+            <span class="material-symbols-outlined absolute right-4 cursor-pointer text-gray-400" onclick="togglePassword('password', this)">visibility</span>
+          </div>
+        </label>
+
+        <!-- Confirm Password -->
+        <label class="flex flex-col">
+          <p class="pb-2 text-base font-medium">Confirm Password</p>
+          <div class="relative flex w-full items-center">
+            <input id="confirmPassword" class="form-input h-14 w-full flex-1 rounded-DEFAULT border border-border-light bg-transparent p-4 text-base placeholder:text-placeholder-light focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border-dark dark:text-text-dark dark:placeholder:text-placeholder-dark" placeholder="Confirm your password" type="password" required/>
+            <span class="material-symbols-outlined absolute right-4 cursor-pointer text-gray-400" onclick="togglePassword('confirmPassword', this)">visibility_off</span>
+          </div>
+          <p id="passwordError" class="mt-1 text-sm text-error hidden">Passwords do not match.</p>
+        </label>
+
+        <!-- Success/Error Messages -->
+        <div id="alertMessage" class="hidden p-4 rounded-DEFAULT"></div>
+
+        <!-- Submit Button -->
+        <div>
+          <button id="submitBtn" type="submit" class="flex h-14 w-full cursor-pointer items-center justify-center overflow-hidden rounded-DEFAULT bg-primary text-base font-bold text-white transition-colors hover:bg-primary/90">
+            <span class="truncate">Create Account</span>
+          </button>
+        </div>
+
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+          By creating an account, you agree to our
+          <a class="font-semibold text-primary hover:underline" href="#">Terms of Service</a> and
+          <a class="font-semibold text-primary hover:underline" href="#">Privacy Policy</a>.
+        </p>
+      </form>
+    </div>
+
+    <div class="mt-6 text-center">
+      <p class="text-base text-gray-500 dark:text-gray-400">
+        Already have an account?
+        <a class="font-bold text-primary hover:underline" href="login.html">Log In</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Configuration
+  const API_BASE_URL = 'http://localhost:5000/api';
+
+  // Toggle between Student and Teacher fields
+  document.getElementById('userType').addEventListener('change', function() {
+    const rollNumberGroup = document.getElementById('rollNumberGroup');
+    const employeeIdGroup = document.getElementById('employeeIdGroup');
+    const rollNumberInput = document.getElementById('rollNumber');
+    const employeeIdInput = document.getElementById('employeeId');
+
+    if (this.value === 'STUDENT') {
+      rollNumberGroup.classList.remove('hidden');
+      employeeIdGroup.classList.add('hidden');
+      rollNumberInput.required = true;
+      employeeIdInput.required = false;
+    } else {
+      rollNumberGroup.classList.add('hidden');
+      employeeIdGroup.classList.remove('hidden');
+      rollNumberInput.required = false;
+      employeeIdInput.required = true;
+    }
+  });
+
+  // Toggle password visibility
+  function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.textContent = 'visibility';
+    } else {
+      input.type = 'password';
+      icon.textContent = 'visibility_off';
+    }
+  }
+
+  // Show alert message
+  function showAlert(message, type) {
+    const alertDiv = document.getElementById('alertMessage');
+    alertDiv.textContent = message;
+    alertDiv.className = `p-4 rounded-DEFAULT ${type === 'success' ? 'bg-success/20 text-success' : 'bg-error/20 text-error'}`;
+    alertDiv.classList.remove('hidden');
+
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      alertDiv.classList.add('hidden');
+    }, 5000);
+  }
+
+  // Form submission
+  document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Get form values
+    const userType = document.getElementById('userType').value;
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const department = document.getElementById('department').value.trim();
+
+    // Validate passwords match
+    const passwordError = document.getElementById('passwordError');
+    if (password !== confirmPassword) {
+      passwordError.classList.remove('hidden');
+      document.getElementById('confirmPassword').classList.add('border-error');
+      return;
+    } else {
+      passwordError.classList.add('hidden');
+      document.getElementById('confirmPassword').classList.remove('border-error');
+    }
+
+    // Build request data
+    const requestData = {
+      email: email,
+      password: password,
+      full_name: fullName,
+      user_type: userType,
+      phone_number: phoneNumber || null,
+      department: department || null
+    };
+
+    // Add role-specific fields
+    if (userType === 'STUDENT') {
+      requestData.roll_number = document.getElementById('rollNumber').value.trim();
+    } else {
+      requestData.employee_id = document.getElementById('employeeId').value.trim();
+    }
+
+    // Disable submit button
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="truncate">Creating Account...</span>';
+
+    try {
+      // Make API call
+      const response = await fetch(`${API_BASE_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === 'success') {
+        showAlert('Account created successfully! Redirecting to login...', 'success');
+
+        // Redirect to login page after 2 seconds
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+      } else {
+        showAlert(data.message || 'Registration failed. Please try again.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span class="truncate">Create Account</span>';
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showAlert('Network error. Please check if the backend server is running.', 'error');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span class="truncate">Create Account</span>';
+    }
+  });
+</script>
+</body>
+</html>

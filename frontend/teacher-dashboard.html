@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Teacher Dashboard - EduAssess</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#212529] dark:text-white">
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="flex flex-col w-64 bg-white dark:bg-background-dark border-r border-gray-200">
+        <div class="flex items-center justify-center h-16 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-primary">EduAssess</h1>
+        </div>
+        <div class="flex flex-col flex-1 p-4">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="bg-primary flex items-center justify-center text-white font-bold rounded-full size-12" id="teacherAvatar">T</div>
+                <div class="flex flex-col">
+                    <h2 class="text-base font-semibold" id="teacherName">Teacher</h2>
+                    <p class="text-sm text-gray-500">Instructor</p>
+                </div>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <a class="flex items-center gap-3 px-3 py-2 text-primary bg-primary/10 rounded-lg font-semibold" href="teacher-dashboard.html">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary/10" href="create-exam.html">
+                    <span class="material-symbols-outlined">description</span>
+                    <span>Create Exam</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary/10" href="my-exams.html">
+                    <span class="material-symbols-outlined">assignment</span>
+                    <span>My Exams</span>
+                </a>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-gray-200">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-gray-200 text-gray-800 text-sm font-medium hover:bg-gray-300">
+                <span class="material-symbols-outlined">logout</span>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-6">
+        <div class="max-w-7xl mx-auto">
+            <h1 class="text-3xl font-bold mb-2">Welcome back, <span id="teacherNameMain">Teacher</span>!</h1>
+            <p class="text-gray-500 mb-8">Here's what's happening with your exams today.</p>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="material-symbols-outlined text-blue-600 text-3xl">assignment</span>
+                        <span class="text-sm text-gray-500">Total</span>
+                    </div>
+                    <p class="text-3xl font-bold" id="totalExams">0</p>
+                    <p class="text-sm text-gray-500">Total Exams</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="material-symbols-outlined text-green-600 text-3xl">check_circle</span>
+                        <span class="text-sm text-gray-500">Published</span>
+                    </div>
+                    <p class="text-3xl font-bold" id="publishedExams">0</p>
+                    <p class="text-sm text-gray-500">Published</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="material-symbols-outlined text-purple-600 text-3xl">play_circle</span>
+                        <span class="text-sm text-gray-500">Live</span>
+                    </div>
+                    <p class="text-3xl font-bold" id="activeExams">0</p>
+                    <p class="text-sm text-gray-500">Active Now</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="material-symbols-outlined text-orange-600 text-3xl">people</span>
+                        <span class="text-sm text-gray-500">Students</span>
+                    </div>
+                    <p class="text-3xl font-bold" id="completedSessions">0</p>
+                    <p class="text-sm text-gray-500">Completed</p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl text-white cursor-pointer hover:shadow-lg transition" onclick="window.location.href='create-exam.html'">
+                    <span class="material-symbols-outlined text-4xl mb-4">add_circle</span>
+                    <h3 class="text-xl font-bold mb-2">Create New Exam</h3>
+                    <p class="text-blue-100">Design a new exam for your students</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-xl text-white cursor-pointer hover:shadow-lg transition" onclick="window.location.href='my-exams.html'">
+                    <span class="material-symbols-outlined text-4xl mb-4">visibility</span>
+                    <h3 class="text-xl font-bold mb-2">Monitor Live Exams</h3>
+                    <p class="text-purple-100">View students taking exams right now</p>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl text-white cursor-pointer hover:shadow-lg transition" onclick="window.location.href='my-exams.html'">
+                    <span class="material-symbols-outlined text-4xl mb-4">assessment</span>
+                    <h3 class="text-xl font-bold mb-2">View Results</h3>
+                    <p class="text-green-100">Check exam results and analytics</p>
+                </div>
+            </div>
+
+            <!-- Recent Exams -->
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+                <h2 class="text-xl font-bold mb-4">Recent Exams</h2>
+                <div id="recentExams" class="space-y-4">
+                    <!-- Loading -->
+                    <div class="text-center py-8 text-gray-500">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:5000/api';
+    let currentUser = null;
+
+    window.onload = async () => {
+        const userData = localStorage.getItem('userData');
+        const token = localStorage.getItem('authToken');
+
+        if (!userData || !token) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        currentUser = JSON.parse(userData);
+
+        // Update UI with user info
+        document.getElementById('teacherName').textContent = currentUser.full_name;
+        document.getElementById('teacherNameMain').textContent = currentUser.full_name;
+        const initials = currentUser.full_name.split(' ').map(n => n[0]).join('').substring(0, 2);
+        document.getElementById('teacherAvatar').textContent = initials;
+
+        // Load dashboard data
+        await loadStats();
+        await loadRecentExams();
+    };
+
+    async function loadStats() {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch(`${API_BASE}/teacher/stats`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                document.getElementById('totalExams').textContent = data.stats.total_exams;
+                document.getElementById('publishedExams').textContent = data.stats.published_exams;
+                document.getElementById('activeExams').textContent = data.stats.active_exams;
+                document.getElementById('completedSessions').textContent = data.stats.completed_sessions;
+            }
+        } catch (error) {
+            console.error('Failed to load stats:', error);
+        }
+    }
+
+    async function loadRecentExams() {
+        try {
+            const token = localStorage.getItem('authToken');
+            const response = await fetch(`${API_BASE}/teacher/exams`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                renderRecentExams(data.exams.slice(0, 5)); // Show only 5 recent
+            }
+        } catch (error) {
+            console.error('Failed to load exams:', error);
+        }
+    }
+
+    function renderRecentExams(exams) {
+        const container = document.getElementById('recentExams');
+
+        if (exams.length === 0) {
+            container.innerHTML = '<p class="text-center py-8 text-gray-500">No exams created yet</p>';
+            return;
+        }
+
+        container.innerHTML = exams.map(exam => `
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900">${exam.exam_title}</h3>
+                    <p class="text-sm text-gray-500">${exam.subject} • ${exam.question_count} questions</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                        exam.exam_status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+                        exam.exam_status === 'UPCOMING' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-700'
+                    }">${exam.exam_status}</span>
+                    <button onclick="window.location.href='my-exams.html'" class="text-primary hover:text-primary/80">
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function logout() {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        window.location.href = 'login.html';
+    }
+</script>
+</body>
+</html>

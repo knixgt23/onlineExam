@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduAssess - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#005A9C",
+          "background-light": "#f8f9fa",
+          "background-dark": "#101922",
+          "neutral-gray": "#6c757d",
+          "success": "#2ECC71",
+          "error": "#E74C3C"
+        },
+        fontFamily: {
+          "display": ["Inter", "sans-serif"]
+        },
+        borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+      },
+    },
+  }
+</script>
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  .form-input {
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  .form-input:focus-within, .form-input:focus {
+    border-color: #005A9C !important;
+    box-shadow: 0 0 0 2px rgba(0, 90, 156, 0.2);
+    outline: none;
+  }
+  .hidden {
+    display: none !important;
+  }
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-neutral-gray dark:text-gray-300">
+<div class="relative flex min-h-screen w-full flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 overflow-hidden">
+  <!-- Background elements -->
+  <div class="absolute top-0 left-0 -translate-x-1/4 -translate-y-1/4 w-96 h-96 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl opacity-50"></div>
+  <div class="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 w-96 h-96 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl opacity-50"></div>
+
+  <div class="relative z-10 flex w-full max-w-md flex-col items-center p-4">
+    <!-- Header -->
+    <header class="mb-8 flex items-center justify-center gap-3 text-center">
+      <div class="text-primary size-8">
+        <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z" fill="currentColor"></path>
+        </svg>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">EduAssess</h2>
+    </header>
+
+    <!-- Main Card -->
+    <div class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-8 shadow-lg">
+      <div class="text-center">
+        <h1 class="text-gray-900 dark:text-white tracking-light text-2xl font-bold leading-tight">Log in to your Account</h1>
+        <p class="mt-2 text-sm text-neutral-gray dark:text-gray-400">Welcome back! Please enter your details.</p>
+      </div>
+
+      <form id="loginForm" class="mt-8 space-y-6">
+        <!-- Success/Error Messages -->
+        <div id="alertMessage" class="hidden p-4 rounded-lg"></div>
+
+        <!-- Email Field -->
+        <div>
+          <label class="block text-sm font-medium leading-normal text-gray-800 dark:text-gray-200 pb-2" for="email">Email Address</label>
+          <div class="relative">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <span class="material-symbols-outlined text-neutral-gray dark:text-gray-400 h-5 w-5">mail</span>
+            </span>
+            <input autocomplete="email" class="form-input block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-3 pl-10 pr-3 text-gray-900 dark:text-white placeholder:text-neutral-gray dark:placeholder:text-gray-400 focus:outline-none h-12" id="email" name="email" placeholder="you@example.com" required type="email"/>
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <label class="block text-sm font-medium leading-normal text-gray-800 dark:text-gray-200 pb-2" for="password">Password</label>
+          <div class="relative">
+            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+              <span class="material-symbols-outlined text-neutral-gray dark:text-gray-400 h-5 w-5">lock</span>
+            </span>
+            <input autocomplete="current-password" class="form-input block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-3 pl-10 pr-10 text-gray-900 dark:text-white placeholder:text-neutral-gray dark:placeholder:text-gray-400 focus:outline-none h-12" id="password" name="password" placeholder="Enter your password" required type="password"/>
+            <button aria-label="Toggle password visibility" class="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-gray dark:text-gray-400 hover:text-primary dark:hover:text-primary" type="button" onclick="togglePassword()">
+              <span class="material-symbols-outlined h-5 w-5" id="passwordIcon">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Forgot Password -->
+        <div class="flex items-center justify-end">
+          <a class="text-sm font-medium text-primary hover:text-primary/80" href="#">Forgot Password?</a>
+        </div>
+
+        <!-- Login Button -->
+        <div>
+          <button id="submitBtn" class="flex w-full justify-center rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors duration-200" type="submit">
+            Log In
+          </button>
+        </div>
+      </form>
+
+      <!-- Registration Link -->
+      <p class="mt-8 text-center text-sm text-neutral-gray dark:text-gray-400">
+        Don't have an account?
+        <a class="font-semibold leading-6 text-primary hover:text-primary/80" href="register.html">Register here</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Configuration - UPDATE THIS IF YOUR BACKEND IS ON DIFFERENT PORT
+  const API_BASE_URL = 'http://localhost:5000/api';
+
+  // Toggle password visibility
+  function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const passwordIcon = document.getElementById('passwordIcon');
+
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      passwordIcon.textContent = 'visibility_off';
+    } else {
+      passwordInput.type = 'password';
+      passwordIcon.textContent = 'visibility';
+    }
+  }
+
+  // Show alert message
+  function showAlert(message, type) {
+    const alertDiv = document.getElementById('alertMessage');
+    alertDiv.textContent = message;
+
+    if (type === 'success') {
+      alertDiv.className = 'p-4 rounded-lg bg-green-100 text-green-800 border border-green-200';
+    } else {
+      alertDiv.className = 'p-4 rounded-lg bg-red-100 text-red-800 border border-red-200';
+    }
+
+    alertDiv.classList.remove('hidden');
+
+    // Auto-hide success messages after 3 seconds
+    if (type === 'success') {
+      setTimeout(() => {
+        alertDiv.classList.add('hidden');
+      }, 3000);
+    }
+  }
+
+  // Save user data to localStorage
+  function saveUserData(token, user) {
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('userData', JSON.stringify(user));
+    console.log('✅ User data saved to localStorage');
+  }
+
+  // Redirect based on user type
+  function redirectUser(userType) {
+    console.log('🔄 Redirecting user type:', userType);
+
+    switch(userType) {
+      case 'STUDENT':
+        window.location.href = 'student-dashboard.html';
+        break;
+      case 'TEACHER':
+        window.location.href = 'teacher-dashboard.html';
+        break;
+      case 'ADMIN':
+        window.location.href = 'admin-dashboard.html';
+        break;
+      default:
+        window.location.href = 'dashboard.html';
+    }
+  }
+
+  // Form submission
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    console.log('🔐 Login form submitted');
+
+    // Get form values
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    // Validate inputs
+    if (!email || !password) {
+      showAlert('Please enter both email and password', 'error');
+      return;
+    }
+
+    console.log('📧 Email:', email);
+
+    // Disable submit button
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Logging in...';
+
+    try {
+      console.log('📡 Sending login request to:', `${API_BASE_URL}/login`);
+
+      // Make API call
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password
+        })
+      });
+
+      console.log('📨 Response status:', response.status);
+
+      const data = await response.json();
+      console.log('📦 Response data:', data);
+
+      if (response.ok && data.status === 'success') {
+        showAlert('Login successful! Redirecting...', 'success');
+
+        // Save token and user data
+        saveUserData(data.token, data.user);
+
+        // Log user data for debugging
+        console.log('👤 User logged in:', data.user);
+        console.log('🎫 Token received:', data.token.substring(0, 20) + '...');
+
+        // Redirect after 1 second
+        setTimeout(() => {
+          redirectUser(data.user.user_type);
+        }, 1000);
+      } else {
+        showAlert(data.message || 'Login failed. Please check your credentials.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Log In';
+      }
+    } catch (error) {
+      console.error('❌ Error:', error);
+      showAlert('Network error. Please check if the backend server is running on http://localhost:5000', 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Log In';
+    }
+  });
+
+  // Check if user is already logged in on page load
+  window.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('authToken');
+    const userData = localStorage.getItem('userData');
+
+    if (token && userData) {
+      const user = JSON.parse(userData);
+      console.log('✅ User already logged in, redirecting...');
+      redirectUser(user.user_type);
+    }
+  });
+</script>
+</body>
+</html>

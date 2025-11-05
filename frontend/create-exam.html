@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Create Exam - EduAssess</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#212529] dark:text-white">
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="flex flex-col w-64 bg-white dark:bg-background-dark border-r border-[#DEE2E6] dark:border-gray-700">
+        <div class="flex items-center justify-center h-16 border-b border-[#DEE2E6] dark:border-gray-700">
+            <h1 class="text-2xl font-bold text-primary">EduAssess</h1>
+        </div>
+        <div class="flex flex-col flex-1 p-4">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="bg-primary flex items-center justify-center text-white font-bold rounded-full size-12" id="teacherAvatar">T</div>
+                <div class="flex flex-col">
+                    <h2 class="text-base font-semibold" id="teacherName">Teacher</h2>
+                    <p class="text-sm text-[#6C757D]">Instructor</p>
+                </div>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary/10" href="teacher-dashboard.html">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-primary bg-primary/10 rounded-lg font-semibold" href="create-exam.html">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">description</span>
+                    <span>Create Exam</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary/10" href="my-exams.html">
+                    <span class="material-symbols-outlined">assignment</span>
+                    <span>My Exams</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-primary/10" href="#">
+                    <span class="material-symbols-outlined">group</span>
+                    <span>Students</span>
+                </a>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-[#DEE2E6] dark:border-gray-700">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 rounded-lg h-10 px-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600">
+                <span class="material-symbols-outlined">logout</span>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col bg-background-light dark:bg-background-dark overflow-y-auto">
+        <!-- Header -->
+        <header class="sticky top-0 bg-white dark:bg-background-dark/80 backdrop-blur-sm z-10 border-b border-[#DEE2E6] dark:border-gray-700 p-4">
+            <div class="max-w-7xl mx-auto">
+                <p class="text-2xl font-bold tracking-tight">Create New Exam</p>
+                <p class="text-[#6C757D] text-sm mt-1">Fill in the details below to create a new exam for your students.</p>
+            </div>
+        </header>
+
+        <!-- Alert Messages -->
+        <div id="alertContainer" class="max-w-7xl mx-auto w-full px-4 pt-4 hidden">
+            <div id="alertMessage" class="p-4 rounded-lg"></div>
+        </div>
+
+        <!-- Form -->
+        <form id="examForm" class="flex-1 p-4 lg:p-6">
+            <div class="grid grid-cols-12 gap-6 max-w-7xl mx-auto">
+                <!-- Left Column - Exam Details -->
+                <div class="col-span-12 lg:col-span-3">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-[#DEE2E6] dark:border-gray-700 space-y-6 sticky top-24">
+                        <h3 class="text-lg font-semibold border-b border-[#DEE2E6] dark:border-gray-700 pb-3">Exam Details</h3>
+                        <div class="space-y-4">
+                            <label class="flex flex-col">
+                                <p class="text-sm font-medium pb-2">Exam Title *</p>
+                                <input id="examTitle" required class="form-input flex w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="e.g., Mid-Term Physics"/>
+                            </label>
+                            <label class="flex flex-col">
+                                <p class="text-sm font-medium pb-2">Subject *</p>
+                                <input id="subject" required class="form-input flex w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="e.g., Physics"/>
+                            </label>
+                            <label class="flex flex-col">
+                                <p class="text-sm font-medium pb-2">Description</p>
+                                <textarea id="examDescription" rows="3" class="form-textarea w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="Brief description of the exam"></textarea>
+                            </label>
+                            <label class="flex flex-col">
+                                <p class="text-sm font-medium pb-2">Duration (minutes) *</p>
+                                <input id="duration" required type="number" min="1" class="form-input flex w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="e.g., 60"/>
+                            </label>
+                            <label class="flex flex-col">
+                                <p class="text-sm font-medium pb-2">Start Date & Time *</p>
+                                <input id="scheduledDate" required type="datetime-local" class="form-input flex w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary"/>
+                            </label>
+                            <label class="flex flex-col">
+                                <p class="text-sm font-medium pb-2">End Date & Time *</p>
+                                <input id="endDate" required type="datetime-local" class="form-input flex w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary"/>
+                            </label>
+                            <label class="flex flex-col">
+                                <p class="text-sm font-medium pb-2">Total Marks *</p>
+                                <input id="totalMarks" required type="number" min="1" class="form-input flex w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="e.g., 100"/>
+                            </label>
+                            <label class="flex flex-col">
+                                <p class="text-sm font-medium pb-2">Pass Marks *</p>
+                                <input id="passMarks" required type="number" min="1" class="form-input flex w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="e.g., 40"/>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Middle Column - Questions -->
+                <div class="col-span-12 lg:col-span-6 space-y-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-[#DEE2E6] dark:border-gray-700">
+                        <h3 class="text-lg font-semibold border-b border-[#DEE2E6] dark:border-gray-700 pb-3 mb-6">Questions</h3>
+
+                        <!-- Questions Container -->
+                        <div id="questionsContainer" class="space-y-6">
+                            <!-- Questions will be added here dynamically -->
+                        </div>
+
+                        <!-- Add Question Button -->
+                        <button type="button" onclick="addQuestion()" class="mt-6 w-full flex items-center justify-center gap-2 rounded-lg h-11 px-4 border-2 border-dashed border-primary/50 text-primary text-sm font-semibold hover:bg-primary/10">
+                            <span class="material-symbols-outlined">add_circle</span>
+                            Add Question
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column - Settings -->
+                <div class="col-span-12 lg:col-span-3">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border border-[#DEE2E6] dark:border-gray-700 space-y-6 sticky top-24">
+                        <h3 class="text-lg font-semibold border-b border-[#DEE2E6] dark:border-gray-700 pb-3">Exam Settings</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm font-medium flex items-center gap-2" for="fullscreen-toggle">
+                                    Force Full-screen
+                                    <span class="material-symbols-outlined text-gray-400 text-base cursor-pointer" title="Requires students to take the exam in full-screen mode.">info</span>
+                                </label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="fullscreen-toggle" type="checkbox" class="sr-only peer"/>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm font-medium flex items-center gap-2" for="tab-switch-toggle">
+                                    Prevent Tab Switching
+                                    <span class="material-symbols-outlined text-gray-400 text-base cursor-pointer" title="Warns and logs when a student switches to another tab or window.">info</span>
+                                </label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="tab-switch-toggle" type="checkbox" checked class="sr-only peer"/>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm font-medium flex items-center gap-2" for="camera-toggle">
+                                    Require Camera
+                                    <span class="material-symbols-outlined text-gray-400 text-base cursor-pointer" title="Enables proctoring by requiring webcam access during the exam.">info</span>
+                                </label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input id="camera-toggle" type="checkbox" class="sr-only peer"/>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Instructions -->
+                        <div class="space-y-2">
+                            <label class="flex flex-col">
+                                <p class="text-sm font-medium pb-2">Instructions for Students</p>
+                                <textarea id="instructions" rows="5" class="form-textarea w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="Enter exam instructions here..."></textarea>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Footer -->
+        <footer class="sticky bottom-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-sm z-10 border-t border-[#DEE2E6] dark:border-gray-700 p-4">
+            <div class="max-w-7xl mx-auto flex justify-end gap-4">
+                <button type="button" onclick="saveDraft()" class="min-w-[120px] rounded-lg h-11 px-6 bg-[#6C757D]/20 text-[#212529] dark:bg-gray-700 dark:text-white text-sm font-semibold hover:bg-[#6C757D]/30 dark:hover:bg-gray-600">
+                    Save Draft
+                </button>
+                <button type="button" onclick="publishExam()" id="publishBtn" class="min-w-[120px] rounded-lg h-11 px-6 bg-primary text-white text-sm font-semibold hover:bg-primary/90">
+                    Create Exam
+                </button>
+            </div>
+        </footer>
+    </main>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:5000/api';
+    let currentUser = null;
+    let teacherId = null;
+    let questionCount = 0;
+    let createdExamId = null;
+
+    // Initialize on page load
+    window.onload = () => {
+        const userData = localStorage.getItem('userData');
+        const token = localStorage.getItem('authToken');
+
+        if (!userData || !token) {
+            console.log('❌ No user data found, redirecting to login');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        currentUser = JSON.parse(userData);
+        teacherId = currentUser.role_id;
+
+        console.log('👤 Current user:', currentUser);
+        console.log('👨‍🏫 Teacher ID:', teacherId);
+
+        // Update UI
+        document.getElementById('teacherName').textContent = currentUser.full_name;
+        const initials = currentUser.full_name.split(' ').map(n => n[0]).join('').substring(0, 2);
+        document.getElementById('teacherAvatar').textContent = initials;
+
+        // Add first question by default
+        addQuestion();
+    };
+
+    // Add new question
+    function addQuestion() {
+        questionCount++;
+        const container = document.getElementById('questionsContainer');
+
+        const questionHTML = `
+            <div class="bg-background-light dark:bg-background-dark p-4 rounded-lg border border-[#DEE2E6] dark:border-gray-700 space-y-4" id="question-${questionCount}">
+                <div class="flex justify-between items-center">
+                    <p class="font-semibold">Question No. ${questionCount}</p>
+                    <button type="button" onclick="deleteQuestion(${questionCount})" class="text-red-500 hover:text-red-700">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                </div>
+                <textarea class="question-text form-textarea w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="Enter question here..." rows="3" required></textarea>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm font-medium pb-2">Question Type</p>
+                        <select class="question-type form-select w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" onchange="toggleOptions(${questionCount})" required>
+                            <option value="MCQ">Multiple Choice (MCQ)</option>
+                            <option value="SUBJECTIVE">Subjective</option>
+                            <option value="TRUE_FALSE">True/False</option>
+                        </select>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium pb-2">Marks</p>
+                        <input class="question-marks form-input w-full rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="e.g., 5" type="number" min="1" required/>
+                    </div>
+                </div>
+                <div class="options-container space-y-3 pt-2">
+                    <p class="text-sm font-medium">Options (Select correct answer)</p>
+                    <div class="flex items-center gap-3">
+                        <input class="form-radio text-primary focus:ring-primary" name="q${questionCount}_correct" type="radio" value="A"/>
+                        <input class="option-text form-input flex-1 rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="Option A" type="text"/>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input class="form-radio text-primary focus:ring-primary" name="q${questionCount}_correct" type="radio" value="B"/>
+                        <input class="option-text form-input flex-1 rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="Option B" type="text"/>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input class="form-radio text-primary focus:ring-primary" name="q${questionCount}_correct" type="radio" value="C"/>
+                        <input class="option-text form-input flex-1 rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="Option C" type="text"/>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <input class="form-radio text-primary focus:ring-primary" name="q${questionCount}_correct" type="radio" value="D"/>
+                        <input class="option-text form-input flex-1 rounded-lg text-sm bg-transparent border-[#DEE2E6] dark:border-gray-600 focus:ring-primary focus:border-primary" placeholder="Option D" type="text"/>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', questionHTML);
+    }
+
+    // Delete question
+    function deleteQuestion(questionId) {
+        if (questionCount <= 1) {
+            showAlert('At least one question is required!', 'error');
+            return;
+        }
+
+        if (confirm('Are you sure you want to delete this question?')) {
+            document.getElementById(`question-${questionId}`).remove();
+            questionCount--;
+            renumberQuestions();
+        }
+    }
+
+    // Renumber questions after deletion
+    function renumberQuestions() {
+        const questions = document.querySelectorAll('[id^="question-"]');
+        questions.forEach((q, index) => {
+            const num = index + 1;
+            q.querySelector('.font-semibold').textContent = `Question No. ${num}`;
+        });
+    }
+
+    // Toggle options visibility based on question type
+    function toggleOptions(questionId) {
+        const questionDiv = document.getElementById(`question-${questionId}`);
+        const questionType = questionDiv.querySelector('.question-type').value;
+        const optionsContainer = questionDiv.querySelector('.options-container');
+
+        if (questionType === 'SUBJECTIVE') {
+            optionsContainer.style.display = 'none';
+        } else {
+            optionsContainer.style.display = 'block';
+        }
+    }
+
+    // Collect form data
+    function collectFormData() {
+        const examData = {
+            exam_title: document.getElementById('examTitle').value.trim(),
+            subject: document.getElementById('subject').value.trim(),
+            exam_description: document.getElementById('examDescription').value.trim(),
+            duration_minutes: parseInt(document.getElementById('duration').value),
+            scheduled_date: document.getElementById('scheduledDate').value,
+            end_date: document.getElementById('endDate').value,
+            total_marks: parseInt(document.getElementById('totalMarks').value),
+            pass_marks: parseInt(document.getElementById('passMarks').value),
+            instructions: document.getElementById('instructions').value.trim(),
+            full_screen_required: document.getElementById('fullscreen-toggle').checked,
+            dual_camera_required: document.getElementById('camera-toggle').checked,
+            tab_switch_allowed: !document.getElementById('tab-switch-toggle').checked
+        };
+
+        // Validate
+        if (!examData.exam_title || !examData.subject || !examData.duration_minutes ||
+            !examData.scheduled_date || !examData.end_date || !examData.total_marks) {
+            showAlert('Please fill all required fields!', 'error');
+            return null;
+        }
+
+        // Validate dates
+        const startDate = new Date(examData.scheduled_date);
+        const endDate = new Date(examData.end_date);
+        if (endDate <= startDate) {
+            showAlert('End date must be after start date!', 'error');
+            return null;
+        }
+
+        return examData;
+    }
+
+    // Collect questions data
+    function collectQuestionsData() {
+        const questions = [];
+        const questionDivs = document.querySelectorAll('[id^="question-"]');
+
+        let hasError = false;
+
+        questionDivs.forEach((div, index) => {
+            const questionText = div.querySelector('.question-text').value.trim();
+            const questionType = div.querySelector('.question-type').value;
+            const marks = parseInt(div.querySelector('.question-marks').value);
+
+            if (!questionText || !marks) {
+                showAlert(`Question ${index + 1} is incomplete!`, 'error');
+                hasError = true;
+                return;
+            }
+
+            const question = {
+                question_text: questionText,
+                question_type: questionType,
+                marks: marks,
+                question_order: index + 1,
+                options: []
+            };
+
+            // Collect options for MCQ and TRUE_FALSE
+            if (questionType === 'MCQ' || questionType === 'TRUE_FALSE') {
+                const optionsContainer = div.querySelector('.options-container');
+                const radioButtons = optionsContainer.querySelectorAll('input[type="radio"]');
+                const optionInputs = optionsContainer.querySelectorAll('.option-text');
+
+                // Find which radio is checked
+                let correctOptionOrder = null;
+                radioButtons.forEach(radio => {
+                    if (radio.checked) {
+                        correctOptionOrder = radio.value; // A, B, C, or D
+                    }
+                });
+
+                if (!correctOptionOrder) {
+                    showAlert(`Please select the correct answer for Question ${index + 1}!`, 'error');
+                    hasError = true;
+                    return;
+                }
+
+                console.log(`Question ${index + 1} - Correct answer: ${correctOptionOrder}`);
+
+                // Build options array
+                let validOptionCount = 0;
+                optionInputs.forEach((input, optIndex) => {
+                    const optionText = input.value.trim();
+                    if (optionText) {
+                        const optionOrder = String.fromCharCode(65 + optIndex); // A, B, C, D
+
+                        question.options.push({
+                            option_text: optionText,
+                            option_order: optionOrder,
+                            is_correct: optionOrder === correctOptionOrder
+                        });
+
+                        validOptionCount++;
+
+                        console.log(`  Option ${optionOrder}: ${optionText} (${optionOrder === correctOptionOrder ? 'CORRECT' : 'incorrect'})`);
+                    }
+                });
+
+                if (validOptionCount < 2) {
+                    showAlert(`Question ${index + 1} needs at least 2 options!`, 'error');
+                    hasError = true;
+                    return;
+                }
+
+                console.log(`Question ${index + 1} has ${validOptionCount} options`);
+            }
+
+            questions.push(question);
+        });
+
+        if (hasError) {
+            return null;
+        }
+
+        if (questions.length === 0) {
+            showAlert('Please add at least one complete question!', 'error');
+            return null;
+        }
+
+        console.log('✅ Collected questions:', questions);
+        return questions;
+    }
+
+    // Create exam and add questions
+    async function publishExam() {
+        try {
+            // Collect data
+            const examData = collectFormData();
+            if (!examData) return;
+
+            const questions = collectQuestionsData();
+            if (!questions) return;
+
+            // Disable button
+            const publishBtn = document.getElementById('publishBtn');
+            publishBtn.disabled = true;
+            publishBtn.textContent = 'Creating...';
+
+            const token = localStorage.getItem('authToken');
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+
+            console.log('📤 Creating exam:', examData);
+
+            // Step 1: Create exam
+            const examRes = await fetch(`${API_BASE}/teacher/exam/create`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(examData)
+            });
+
+            const examResult = await examRes.json();
+            console.log('📦 Exam creation result:', examResult);
+
+            if (examResult.status !== 'success') {
+                throw new Error(examResult.message || 'Failed to create exam');
+            }
+
+            createdExamId = examResult.exam_id;
+            console.log('✅ Exam created with ID:', createdExamId);
+
+            // Step 2: Add questions
+            publishBtn.textContent = 'Adding questions...';
+
+            for (let i = 0; i < questions.length; i++) {
+                console.log(`📝 Adding question ${i + 1}/${questions.length}`);
+
+                const questionRes = await fetch(`${API_BASE}/teacher/exam/${createdExamId}/question`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(questions[i])
+                });
+
+                const questionResult = await questionRes.json();
+
+                if (questionResult.status !== 'success') {
+                    console.warn('⚠️ Failed to add question:', questionResult.message);
+                }
+            }
+
+            // Step 3: Publish exam
+            publishBtn.textContent = 'Publishing...';
+
+            const publishRes = await fetch(`${API_BASE}/teacher/exam/${createdExamId}/publish`, {
+                method: 'POST',
+                headers: headers
+            });
+
+            const publishResult = await publishRes.json();
+            console.log('📢 Publish result:', publishResult);
+
+            showAlert('✅ Exam created and published successfully!', 'success');
+
+            // Redirect after 2 seconds
+            setTimeout(() => {
+                window.location.href = 'my-exams.html';
+            }, 2000);
+
+        } catch (error) {
+            console.error('❌ Error:', error);
+            showAlert(error.message || 'Failed to create exam', 'error');
+
+            const publishBtn = document.getElementById('publishBtn');
+            publishBtn.disabled = false;
+            publishBtn.textContent = 'Create Exam';
+        }
+    }
+
+    // Save as draft (without publishing)
+    async function saveDraft() {
+        try {
+            const examData = collectFormData();
+            if (!examData) return;
+
+            const token = localStorage.getItem('authToken');
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+
+            console.log('💾 Saving draft:', examData);
+
+            const examRes = await fetch(`${API_BASE}/teacher/exam/create`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(examData)
+            });
+
+            const examResult = await examRes.json();
+
+            if (examResult.status === 'success') {
+                showAlert('✅ Exam saved as draft!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'my-exams.html';
+                }, 1500);
+            } else {
+                throw new Error(examResult.message);
+            }
+
+        } catch (error) {
+            console.error('❌ Error:', error);
+            showAlert(error.message || 'Failed to save draft', 'error');
+        }
+    }
+
+    // Show alert message
+    function showAlert(message, type) {
+        const container = document.getElementById('alertContainer');
+        const alertDiv = document.getElementById('alertMessage');
+
+        alertDiv.textContent = message;
+
+        if (type === 'success') {
+            alertDiv.className = 'p-4 rounded-lg bg-green-100 text-green-800 border border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700';
+        } else {
+            alertDiv.className = 'p-4 rounded-lg bg-red-100 text-red-800 border border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700';
+        }
+
+        container.classList.remove('hidden');
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            container.classList.add('hidden');
+        }, 5000);
+
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Logout function
+    function logout() {
+        console.log('👋 Logging out...');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
+        window.location.href = 'login.html';
+    }
+</script>
+</body>
+</html>

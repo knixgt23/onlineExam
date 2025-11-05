@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Result - EduAssess</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-8 h-8 text-blue-600">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold text-gray-900">EduAssess</h1>
+            </div>
+            <button onclick="goToDashboard()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                Back to Dashboard
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-6 py-8">
+        <!-- Loading State -->
+        <div id="loadingState" class="flex justify-center items-center py-20">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+
+        <!-- Result Content -->
+        <div id="resultContent" class="hidden space-y-6">
+            <!-- Result Header -->
+            <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                <div id="statusIcon" class="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-5xl"></span>
+                </div>
+                <h2 id="resultTitle" class="text-3xl font-bold text-gray-900 mb-2"></h2>
+                <p id="resultSubtitle" class="text-lg text-gray-600 mb-4"></p>
+
+                <!-- Grade Badge -->
+                <div class="inline-flex items-center gap-3 px-6 py-3 bg-gray-50 rounded-lg">
+                    <span class="text-sm text-gray-600">Your Grade:</span>
+                    <span id="gradeBadge" class="text-4xl font-black"></span>
+                </div>
+            </div>
+
+            <!-- Score Details -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-xl shadow-md p-6 text-center">
+                    <div class="text-3xl font-bold text-blue-600" id="scoreValue">0</div>
+                    <div class="text-sm text-gray-600 mt-1">Score</div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 text-center">
+                    <div class="text-3xl font-bold text-purple-600" id="percentValue">0%</div>
+                    <div class="text-sm text-gray-600 mt-1">Percentage</div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 text-center">
+                    <div class="text-3xl font-bold text-green-600" id="rankValue">-</div>
+                    <div class="text-sm text-gray-600 mt-1">Rank</div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md p-6 text-center">
+                    <div class="text-3xl font-bold text-amber-600" id="timeValue">0</div>
+                    <div class="text-sm text-gray-600 mt-1">Time Taken</div>
+                </div>
+            </div>
+
+            <!-- Exam Info -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Exam Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Exam Title:</span>
+                        <span id="examTitle" class="font-semibold text-gray-900"></span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Subject:</span>
+                        <span id="examSubject" class="font-semibold text-gray-900"></span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Status:</span>
+                        <span id="examStatus" class="font-semibold"></span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-gray-600">Submitted On:</span>
+                        <span id="submittedDate" class="font-semibold text-gray-900"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proctoring Report -->
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Proctoring Report</h3>
+                    <span id="proctoringBadge" class="px-3 py-1 rounded-full text-sm font-semibold"></span>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-red-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-2xl font-bold text-red-600" id="highSeverity">0</div>
+                                <div class="text-sm text-red-700">High Severity</div>
+                            </div>
+                            <span class="material-symbols-outlined text-red-600 text-3xl">error</span>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-2xl font-bold text-amber-600" id="mediumSeverity">0</div>
+                                <div class="text-sm text-amber-700">Medium Severity</div>
+                            </div>
+                            <span class="material-symbols-outlined text-amber-600 text-3xl">warning</span>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600" id="totalFlags">0</div>
+                                <div class="text-sm text-blue-700">Total Flags</div>
+                            </div>
+                            <span class="material-symbols-outlined text-blue-600 text-3xl">flag</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Timeline -->
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-700 mb-3">Event Timeline</h4>
+                    <div id="eventTimeline" class="space-y-2 max-h-64 overflow-y-auto">
+                        <!-- Events will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Note -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex gap-3">
+                    <span class="material-symbols-outlined text-blue-600">info</span>
+                    <div class="flex-1">
+                        <p class="text-sm text-blue-900">
+                            <strong>Note:</strong> Your instructor will review your exam and proctoring logs.
+                            If you have any concerns about your result, please contact your instructor.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+const API_BASE = 'http://localhost:5000/api';
+let sessionId = null;
+
+window.onload = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    sessionId = urlParams.get('session_id');
+
+    if (!sessionId) {
+        alert('No session ID provided');
+        window.location.href = 'student-dashboard.html';
+        return;
+    }
+
+    await loadResult();
+};
+
+async function loadResult() {
+    try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${API_BASE}/student/exam/result/${sessionId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        console.log('Result data:', data);
+
+        if (data.status === 'success') {
+            displayResult(data.result);
+        } else {
+            throw new Error(data.message || 'Failed to load result');
+        }
+
+    } catch (error) {
+        console.error('Error loading result:', error);
+        alert('Failed to load exam result. Please try again.');
+    }
+}
+
+function displayResult(result) {
+    // Hide loading, show content
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('resultContent').classList.remove('hidden');
+
+    // Determine pass/fail
+    const isPassed = result.status === 'PASS';
+
+    // Status icon and title
+    const statusIcon = document.getElementById('statusIcon');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultSubtitle = document.getElementById('resultSubtitle');
+
+    if (isPassed) {
+        statusIcon.className = 'mx-auto w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-4';
+        statusIcon.querySelector('span').textContent = 'check_circle';
+        statusIcon.querySelector('span').className = 'material-symbols-outlined text-5xl text-green-600';
+        resultTitle.textContent = 'Congratulations! 🎉';
+        resultTitle.className = 'text-3xl font-bold text-green-600 mb-2';
+        resultSubtitle.textContent = 'You have passed the exam';
+    } else {
+        statusIcon.className = 'mx-auto w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mb-4';
+        statusIcon.querySelector('span').textContent = 'cancel';
+        statusIcon.querySelector('span').className = 'material-symbols-outlined text-5xl text-red-600';
+        resultTitle.textContent = 'Better Luck Next Time';
+        resultTitle.className = 'text-3xl font-bold text-red-600 mb-2';
+        resultSubtitle.textContent = 'You did not pass this exam';
+    }
+
+    // Grade badge
+    const gradeBadge = document.getElementById('gradeBadge');
+    gradeBadge.textContent = result.grade;
+    gradeBadge.className = `text-4xl font-black ${getGradeColor(result.grade)}`;
+
+    // Score details
+    document.getElementById('scoreValue').textContent = `${result.marks_obtained}/${result.total_marks}`;
+    document.getElementById('percentValue').textContent = `${result.percentage.toFixed(1)}%`;
+    document.getElementById('rankValue').textContent = result.rank || 'N/A';
+    document.getElementById('timeValue').textContent = `${result.duration_minutes} min`;
+
+    // Exam info
+    document.getElementById('examTitle').textContent = result.exam_title;
+    document.getElementById('examSubject').textContent = result.subject;
+
+    const statusEl = document.getElementById('examStatus');
+    statusEl.textContent = result.status;
+    statusEl.className = `font-semibold ${isPassed ? 'text-green-600' : 'text-red-600'}`;
+
+    document.getElementById('submittedDate').textContent = formatDate(result.evaluated_at);
+
+    // Proctoring report
+    displayProctoringReport(result.proctoring_summary, result.proctoring_events);
+}
+
+function displayProctoringReport(summary, events) {
+    const totalFlags = summary.total_flags || 0;
+    const highSeverity = summary.high_severity || 0;
+    const mediumSeverity = summary.medium_severity || 0;
+
+    document.getElementById('totalFlags').textContent = totalFlags;
+    document.getElementById('highSeverity').textContent = highSeverity;
+    document.getElementById('mediumSeverity').textContent = mediumSeverity;
+
+    // Proctoring badge
+    const badge = document.getElementById('proctoringBadge');
+    if (totalFlags === 0) {
+        badge.textContent = 'No Issues';
+        badge.className = 'px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold';
+    } else if (highSeverity > 0) {
+        badge.textContent = 'High Risk';
+        badge.className = 'px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold';
+    } else if (mediumSeverity > 0) {
+        badge.textContent = 'Moderate Risk';
+        badge.className = 'px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-semibold';
+    } else {
+        badge.textContent = 'Low Risk';
+        badge.className = 'px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold';
+    }
+
+    // Event timeline
+    const timeline = document.getElementById('eventTimeline');
+
+    if (!events || events.length === 0) {
+        timeline.innerHTML = `
+            <div class="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
+                <span class="material-symbols-outlined text-green-600">check_circle</span>
+                <span class="text-sm text-green-700">No proctoring issues detected</span>
+            </div>
+        `;
+    } else {
+        timeline.innerHTML = events.map(event => {
+            const severityColors = {
+                'HIGH': 'bg-red-50 border-red-200 text-red-700',
+                'MEDIUM': 'bg-amber-50 border-amber-200 text-amber-700',
+                'LOW': 'bg-blue-50 border-blue-200 text-blue-700'
+            };
+
+            const severityIcons = {
+                'HIGH': 'error',
+                'MEDIUM': 'warning',
+                'LOW': 'info'
+            };
+
+            return `
+                <div class="flex items-start gap-3 p-3 border rounded-lg ${severityColors[event.severity]}">
+                    <span class="material-symbols-outlined text-lg">${severityIcons[event.severity]}</span>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="font-semibold text-sm">${formatEventType(event.event_type)}</span>
+                            <span class="text-xs">${formatTime(event.time)}</span>
+                        </div>
+                        <p class="text-xs">${event.description}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+function getGradeColor(grade) {
+    const colors = {
+        'A+': 'text-green-600',
+        'A': 'text-green-500',
+        'B': 'text-blue-600',
+        'C': 'text-yellow-600',
+        'D': 'text-orange-600',
+        'F': 'text-red-600'
+    };
+    return colors[grade] || 'text-gray-600';
+}
+
+function formatEventType(type) {
+    return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function formatTime(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function goToDashboard() {
+    window.location.href = 'student-dashboard.html';
+}
+    </script>
+</body>
+</html>

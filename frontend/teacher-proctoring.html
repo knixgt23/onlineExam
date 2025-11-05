@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>EduAssess - Proctoring Monitor</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "success": "#16a34a",
+                        "error": "#dc2626",
+                        "warning": "#f59e0b"
+                    },
+                    fontFamily: {"display": ["Inter", "sans-serif"]}
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-display bg-slate-50">
+<div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="text-primary">
+                        <svg class="w-8 h-8" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M36.7273 44C33.9891 44 31.6043 39.8386 30.3636 33.69C29.123 39.8386 26.7382 44 24 44C21.2618 44 18.877 39.8386 17.6364 33.69C16.3957 39.8386 14.0109 44 11.2727 44C7.25611 44 4 35.0457 4 24C4 12.9543 7.25611 4 11.2727 4C14.0109 4 16.3957 8.16144 17.6364 14.31C18.877 8.16144 21.2618 4 24 4C26.7382 4 29.123 8.16144 30.3636 14.31C31.6043 8.16144 33.9891 4 36.7273 4C40.7439 4 44 12.9543 44 24C44 35.0457 40.7439 44 36.7273 44Z" fill="currentColor"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900">Proctoring Monitor</h1>
+                        <p class="text-sm text-slate-500" id="examTitle">Select an exam to monitor</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-success/10 text-success rounded-lg text-sm font-medium">
+                        <span class="w-2 h-2 bg-success rounded-full animate-pulse"></span>
+                        <span id="liveCount">0</span> Live
+                    </div>
+                    <a href="teacher-dashboard.html" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-primary">
+                        Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 py-6 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Exam Selector -->
+            <div class="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+                <label class="block text-sm font-semibold text-slate-900 mb-2">Select Exam to Monitor</label>
+                <select id="examSelect" onchange="loadExamSessions()" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">Loading exams...</option>
+                </select>
+            </div>
+
+            <!-- Stats Overview -->
+            <div id="statsSection" class="hidden grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-xl border border-slate-200 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm text-slate-500">Active Students</div>
+                            <div class="text-3xl font-bold text-slate-900" id="activeStudents">0</div>
+                        </div>
+                        <span class="material-symbols-outlined text-4xl text-primary">person</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm text-slate-500">Total Alerts</div>
+                            <div class="text-3xl font-bold text-warning" id="totalAlerts">0</div>
+                        </div>
+                        <span class="material-symbols-outlined text-4xl text-warning">warning</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm text-slate-500">High Severity</div>
+                            <div class="text-3xl font-bold text-error" id="highAlerts">0</div>
+                        </div>
+                        <span class="material-symbols-outlined text-4xl text-error">error</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl border border-slate-200 p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-sm text-slate-500">Completed</div>
+                            <div class="text-3xl font-bold text-success" id="completedStudents">0</div>
+                        </div>
+                        <span class="material-symbols-outlined text-4xl text-success">check_circle</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Sessions Table -->
+            <div id="sessionsSection" class="hidden bg-white rounded-xl border border-slate-200">
+                <div class="p-6 border-b border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-bold text-slate-900">Active Exam Sessions</h2>
+                        <button onclick="refreshSessions()" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg">
+                            <span class="material-symbols-outlined">refresh</span>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Student</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Roll Number</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Start Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Alerts</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessionsTableBody" class="divide-y divide-slate-200">
+                            <!-- Rows will be dynamically inserted -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden bg-white rounded-xl border border-slate-200 p-12 text-center">
+                <span class="material-symbols-outlined text-6xl text-slate-300">monitor_heart</span>
+                <h3 class="mt-4 text-lg font-semibold text-slate-900">No Active Sessions</h3>
+                <p class="mt-2 text-slate-600">There are no students currently taking this exam.</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Proctoring Details Modal -->
+<div id="detailsModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-xl max-w-3xl w-full my-8">
+        <div class="p-6 border-b border-slate-200 flex items-center justify-between">
+            <div>
+                <h3 class="text-xl font-bold text-slate-900" id="modalStudentName">Student Name</h3>
+                <p class="text-sm text-slate-500" id="modalRollNumber">Roll Number</p>
+            </div>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600">
+                <span class="material-symbols-outlined text-3xl">close</span>
+            </button>
+        </div>
+        <div class="p-6 max-h-[60vh] overflow-y-auto">
+            <h4 class="font-semibold text-slate-900 mb-4">Proctoring Events</h4>
+            <div id="modalEventsList" class="space-y-3">
+                <!-- Events will be dynamically inserted -->
+            </div>
+        </div>
+        <div class="p-6 border-t border-slate-200 flex gap-3">
+            <button onclick="disqualifyStudent()" class="px-6 py-3 bg-error hover:bg-red-700 text-white font-semibold rounded-lg">
+                Disqualify Student
+            </button>
+            <button onclick="closeModal()" class="flex-1 px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold rounded-lg">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const API_BASE = 'http://localhost:5000/api';
+let currentExamId = null;
+let currentSessionId = null;
+let refreshInterval = null;
+
+window.onload = async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    await loadExams();
+};
+
+async function loadExams() {
+    try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${API_BASE}/teacher/exams`, {
+            headers: {'Authorization': `Bearer ${token}`}
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            const select = document.getElementById('examSelect');
+            select.innerHTML = '<option value="">-- Select an Exam --</option>';
+
+            // Filter for active/upcoming exams
+            const activeExams = data.exams.filter(e =>
+                e.exam_status === 'ACTIVE' || e.exam_status === 'UPCOMING'
+            );
+
+            activeExams.forEach(exam => {
+                const option = document.createElement('option');
+                option.value = exam.exam_id;
+                option.textContent = `${exam.exam_title} - ${exam.subject} (${exam.exam_status})`;
+                select.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading exams:', error);
+    }
+}
+
+async function loadExamSessions() {
+    const examId = document.getElementById('examSelect').value;
+
+    if (!examId) {
+        hideAllSections();
+        return;
+    }
+
+    currentExamId = examId;
+
+    // Start auto-refresh
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+    refreshInterval = setInterval(refreshSessions, 10000); // Refresh every 10 seconds
+
+    await refreshSessions();
+}
+
+async function refreshSessions() {
+    if (!currentExamId) return;
+
+    try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${API_BASE}/teacher/exam/${currentExamId}/sessions`, {
+            headers: {'Authorization': `Bearer ${token}`}
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            displaySessions(data.sessions);
+        }
+    } catch (error) {
+        console.error('Error loading sessions:', error);
+    }
+}
+
+function displaySessions(sessions) {
+    const activeSessions = sessions.filter(s => s.status === 'IN_PROGRESS');
+    const completedSessions = sessions.filter(s => s.status === 'COMPLETED');
+
+    // Update stats
+    document.getElementById('activeStudents').textContent = activeSessions.length;
+    document.getElementById('completedStudents').textContent = completedSessions.length;
+    document.getElementById('liveCount').textContent = activeSessions.length;
+
+    const totalAlerts = activeSessions.reduce((sum, s) => sum + (s.total_alerts || 0), 0);
+    const highAlerts = activeSessions.reduce((sum, s) => sum + (s.high_severity_alerts || 0), 0);
+
+    document.getElementById('totalAlerts').textContent = totalAlerts;
+    document.getElementById('highAlerts').textContent = highAlerts;
+
+    // Show sections
+    document.getElementById('statsSection').classList.remove('hidden');
+
+    if (activeSessions.length === 0) {
+        document.getElementById('sessionsSection').classList.add('hidden');
+        document.getElementById('emptyState').classList.remove('hidden');
+    } else {
+        document.getElementById('sessionsSection').classList.remove('hidden');
+        document.getElementById('emptyState').classList.add('hidden');
+
+        // Populate table
+        const tbody = document.getElementById('sessionsTableBody');
+        tbody.innerHTML = '';
+
+        activeSessions.forEach(session => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-50';
+
+            const elapsedTime = calculateElapsedTime(session.start_time);
+            const alertClass = session.high_severity_alerts > 0 ? 'text-error' :
+                              session.total_alerts > 3 ? 'text-warning' : 'text-slate-600';
+
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="font-medium text-slate-900">${session.student_name}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                    ${session.roll_number}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                    ${elapsedTime}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-success/10 text-success">
+                        Active
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-2">
+                        <span class="${alertClass} font-semibold">${session.total_alerts || 0}</span>
+                        ${session.high_severity_alerts > 0 ?
+                            `<span class="material-symbols-outlined text-error text-lg">warning</span>` : ''}
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <button onclick="viewDetails(${session.session_id})"
+                            class="text-primary hover:text-blue-700 font-medium">
+                        View Details
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+}
+
+function calculateElapsedTime(startTime) {
+    const start = new Date(startTime);
+    const now = new Date();
+    const diff = Math.floor((now - start) / 1000 / 60); // minutes
+
+    const hours = Math.floor(diff / 60);
+    const minutes = diff % 60;
+
+    return hours > 0 ? `${hours}h ${minutes}m ago` : `${minutes}m ago`;
+}
+
+async function viewDetails(sessionId) {
+    currentSessionId = sessionId;
+
+    try {
+        const token = localStorage.getItem('authToken');
+
+        // Get session info
+        const sessionResponse = await fetch(`${API_BASE}/student/session/${sessionId}`, {
+            headers: {'Authorization': `Bearer ${token}`}
+        });
+        const sessionData = await sessionResponse.json();
+
+        // Get proctoring logs
+        const logsResponse = await fetch(`${API_BASE}/teacher/session/${sessionId}/proctoring`, {
+            headers: {'Authorization': `Bearer ${token}`}
+        });
+        const logsData = await logsResponse.json();
+
+        if (sessionData.status === 'success' && logsData.status === 'success') {
+            displayModal(sessionData.session, logsData.logs);
+        }
+    } catch (error) {
+        console.error('Error loading details:', error);
+        alert('Failed to load proctoring details');
+    }
+}
+
+function displayModal(session, logs) {
+    document.getElementById('modalStudentName').textContent = session.student_name || 'Student';
+    document.getElementById('modalRollNumber').textContent = session.roll_number || 'N/A';
+
+    const eventsList = document.getElementById('modalEventsList');
+    eventsList.innerHTML = '';
+
+    if (logs.length === 0) {
+        eventsList.innerHTML = `
+            <div class="text-center py-8 text-slate-500">
+                <span class="material-symbols-outlined text-4xl">check_circle</span>
+                <p class="mt-2">No proctoring events recorded</p>
+            </div>
+        `;
+    } else {
+        logs.forEach(log => {
+            const severityColors = {
+                'HIGH': 'bg-red-50 border-error text-error',
+                'MEDIUM': 'bg-amber-50 border-warning text-warning',
+                'LOW': 'bg-slate-50 border-slate-300 text-slate-600'
+            };
+
+            const div = document.createElement('div');
+            div.className = `p-4 border-l-4 rounded ${severityColors[log.severity]}`;
+            div.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div>
+                        <div class="font-semibold">${log.event_type.replace(/_/g, ' ')}</div>
+                        <div class="text-sm mt-1 opacity-75">${log.event_description}</div>
+                        <div class="text-xs mt-2">${new Date(log.detected_at).toLocaleString()}</div>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-semibold rounded">${log.severity}</span>
+                </div>
+            `;
+            eventsList.appendChild(div);
+        });
+    }
+
+    document.getElementById('detailsModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('detailsModal').classList.add('hidden');
+    currentSessionId = null;
+}
+
+async function disqualifyStudent() {
+    if (!currentSessionId) return;
+
+    const reason = prompt('Enter reason for disqualification:');
+    if (!reason) return;
+
+    try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${API_BASE}/teacher/session/${currentSessionId}/disqualify`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reason })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'success') {
+            alert('Student has been disqualified');
+            closeModal();
+            refreshSessions();
+        } else {
+            alert('Failed to disqualify student: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error disqualifying student:', error);
+        alert('Failed to disqualify student');
+    }
+}
+
+function hideAllSections() {
+    document.getElementById('statsSection').classList.add('hidden');
+    document.getElementById('sessionsSection').classList.add('hidden');
+    document.getElementById('emptyState').classList.add('hidden');
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+});
+</script>
+</body>
+</html>
