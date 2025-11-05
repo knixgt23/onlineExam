@@ -1,5 +1,6 @@
+psycopg2-binary
 flask
 flask-cors
-cx_Oracle
-PyJWT
-Werkzeug
+pyjwt
+werkzeug
+passlib
