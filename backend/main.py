@@ -1,17 +1,19 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from datetime import datetime, timedelta
 from functools import wraps
 import jwt
-import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
-from Secret_info_dont_upload_this_in_deployment import DATABASE_URL, JWT_KEY
+from Secret_info_dont_upload_this_in_deployment import CONFIG,JWT_KEY
+from flask import Flask,request,jsonify
+from flask_cors import CORS
+import cx_Oracle
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
-app = Flask(__name__)
+app=Flask(__name__)
 CORS(app)
 
 app.config['JWT_SECRET_KEY'] = JWT_KEY
+
+ORACLE_CONFIG=CONFIG
 
 
 # JWT Token verification decorator
@@ -38,15 +40,13 @@ def token_required(f):
 
     return decorated
 
-
-# ✅ Connect PostgreSQL DB
+#connect DB
 def get_db_connection():
     try:
-        connection = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-        print("✅ Connected to PostgreSQL successfully")
+        connection=cx_Oracle.connect(**ORACLE_CONFIG)
         return connection
-    except Exception as error:
-        print(f"❌ DB connection error: {error}")
+    except cx_Oracle.Error as error:
+        print(f"DB connection error: {error}")
         return None
 
 
@@ -2264,7 +2264,4 @@ def get_exam_questions(current_user, exam_id):
         cursor.close()
         conn.close()
 
-if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+app.run(debug=True, port=5000, host='0.0.0.0')

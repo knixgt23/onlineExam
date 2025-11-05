@@ -1,5 +1,8 @@
-import os
+CONFIG={
+    'user':'C##exam_admin',
+    'password':'exam_password_123',
+    'dsn':'localhost:1521/XE',
+    'encoding':'UTF-8'
+}
 
-DATABASE_URL = os.getenv("DATABASE_URL")  # This is from Render environment variable
-
-JWT_KEY = os.getenv("JWT_KEY", "fallback-secret-if-not-set")
+JWT_KEY='your-jwt-secret-key-change-this-in-production'
