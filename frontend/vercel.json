@@ -1,7 +1,8 @@
 {
-  "public": "frontend",
+  "public": ".",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/", "destination": "/login.html" }
+    { "source": "/", "destination": "/login.html" },
+    { "source": "/(.*)", "destination": "/$1" }
   ]
 }
